@@ -1,10 +1,13 @@
 package com.example.todoapp.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.EditTaskActivity
 import com.example.todoapp.databinding.TaskLayoutBinding
 import com.example.todoapp.model.Task
 
@@ -25,7 +28,12 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         binding.endDate.text = task.endDate.toString()
 
         binding.root.setOnClickListener {
-
+            val context = holder.itemView.context
+            val intent = Intent(context, EditTaskActivity::class.java).apply {
+                putExtra("task", task)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            context.startActivity(intent)
         }
     }
 
@@ -41,5 +49,5 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         }
     }
 
-    private val differ = AsyncListDiffer(this, diffCallback)
+    val differ = AsyncListDiffer(this, diffCallback)
 }

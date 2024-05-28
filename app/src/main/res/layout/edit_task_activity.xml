@@ -68,12 +68,12 @@
         android:layout_weight="0.1"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+
     <Button
-        android:id="@+id/addTaskButton"
+        android:id="@+id/editTaskButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="@string/add_task"
+        android:text="@string/edit_task"
         android:layout_weight="0.1"/>
-
 
 </LinearLayout>

@@ -49,7 +49,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     }
 
     override fun onDateSelected(year: Int, month: Int, day: Int) {
-        selectedDate = LocalDate.of(year, month + 1, day) // Month is 0-based, adjust accordingly
+        selectedDate = LocalDate.of(year, month + 1, day)
         binding.dateText.text = selectedDate.toString()
     }
 

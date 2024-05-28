@@ -4,4 +4,12 @@
     <string name="title_activity_add_task">AddTaskActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="set_task_to_done">Set task to done</string>
+    <string name="title_activity_edit_task">edit_task_activity</string>
+    <string name="edit_task">Edit task</string>
+    <string name="pick_date">Pick date</string>
+    <string name="category">category</string>
+    <string name="description">description</string>
+    <string name="title">title</string>
+    <string name="notification">Notification</string>
+    <string name="add_task">Add Task</string>
 </resources>
