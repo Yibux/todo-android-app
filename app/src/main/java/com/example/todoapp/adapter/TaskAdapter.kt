@@ -20,6 +20,13 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val binding = TaskLayoutBinding.bind(holder.itemView)
+        val task = differ.currentList[position]
+        binding.titleTextView.text = task.title
+        binding.endDate.text = task.endDate.toString()
+
+        binding.root.setOnClickListener {
+
+        }
     }
 
     override fun getItemCount() = differ.currentList.size
