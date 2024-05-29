@@ -1,14 +1,14 @@
 package com.example.todoapp.model
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.Date
-import java.util.UUID
+
 @Entity(tableName = "tasks")
+@Parcelize
 data class Task(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -37,4 +37,4 @@ data class Task(
 
     @ColumnInfo(name = "attachments")
     var attachments : List<String> = emptyList()
-)
+) : Parcelable

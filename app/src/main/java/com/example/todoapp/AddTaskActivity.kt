@@ -1,10 +1,14 @@
 package com.example.todoapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +32,10 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     private lateinit var binding: AddTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
+    private var attachments: MutableList<String> = mutableListOf()
+    companion object {
+        const val PICK_FILE_REQUEST_CODE = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +46,12 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
+        binding.addTaskButton.isEnabled = false
+        binding.titleEditText.addTextChangedListener(textWatcher)
+        binding.descriptionEditText.addTextChangedListener(textWatcher)
+        binding.categoryEditText.addTextChangedListener(textWatcher)
+        binding.dateText.addTextChangedListener(textWatcher)
+
         binding.addTaskButton.setOnClickListener {
             addTask()
         }
@@ -46,11 +60,55 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             val datePicker = DatePickerFragment()
             datePicker.show(supportFragmentManager, "datePicker")
         }
+
+        binding.attachFileButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            getContent.launch(intent)
+        }
+    }
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val clipData = result.data?.clipData
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    val uri = clipData.getItemAt(i).uri
+                    attachments.add(uri.toString())
+                }
+            } else {
+                result.data?.data?.let { uri ->
+                    attachments.add(uri.toString())
+                }
+            }
+            binding.attachedFilesText.text = attachments.joinToString("\n")
+        }
+    }
+
+
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            activeTaskButton()
+        }
+
+        override fun afterTextChanged(s: Editable?) {}
+    }
+
+    private fun activeTaskButton() {
+        binding.addTaskButton.isEnabled = binding.titleEditText.text!!.isNotEmpty() &&
+                binding.descriptionEditText.text!!.isNotEmpty() &&
+                binding.categoryEditText.text!!.isNotEmpty() &&
+                binding.dateText.text!!.isNotEmpty()
     }
 
     override fun onDateSelected(year: Int, month: Int, day: Int) {
-        selectedDate = LocalDate.of(year, month + 1, day) // Month is 0-based, adjust accordingly
+        selectedDate = LocalDate.of(year, month + 1, day)
         binding.dateText.text = selectedDate.toString()
+        activeTaskButton()
     }
 
     private fun addTask() {
@@ -58,7 +116,9 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         val description = binding.descriptionEditText.text.toString()
         val category = binding.categoryEditText.text.toString()
         val endDate = LocalDate.now()
-//        val endDate = createDateFromString(binding.endDateEditText.text.toString())
+        //TODO: Add attachments
+        //TODO: change enddate to selectedDate
+        //val endDate = createDateFromString(binding.endDateEditText.text.toString())
         val notificationEnabled = binding.notificationSwitch.isChecked
 
         val task = Task(0,
@@ -69,7 +129,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             endDate,
             notificationEnabled,
             category,
-            emptyList())
+            attachments
+        )
 
         taskViewModel.addTask(task)
 
