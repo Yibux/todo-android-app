@@ -3,6 +3,8 @@ package com.example.todoapp
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -44,6 +46,12 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
+        binding.addTaskButton.isEnabled = false
+        binding.titleEditText.addTextChangedListener(textWatcher)
+        binding.descriptionEditText.addTextChangedListener(textWatcher)
+        binding.categoryEditText.addTextChangedListener(textWatcher)
+        binding.dateText.addTextChangedListener(textWatcher)
+
         binding.addTaskButton.setOnClickListener {
             addTask()
         }
@@ -65,7 +73,6 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val clipData = result.data?.clipData
-            val uris = mutableListOf<String>()
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
@@ -80,9 +87,28 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         }
     }
 
+
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            activeTaskButton()
+        }
+
+        override fun afterTextChanged(s: Editable?) {}
+    }
+
+    private fun activeTaskButton() {
+        binding.addTaskButton.isEnabled = binding.titleEditText.text!!.isNotEmpty() &&
+                binding.descriptionEditText.text!!.isNotEmpty() &&
+                binding.categoryEditText.text!!.isNotEmpty() &&
+                binding.dateText.text!!.isNotEmpty()
+    }
+
     override fun onDateSelected(year: Int, month: Int, day: Int) {
         selectedDate = LocalDate.of(year, month + 1, day)
         binding.dateText.text = selectedDate.toString()
+        activeTaskButton()
     }
 
     private fun addTask() {

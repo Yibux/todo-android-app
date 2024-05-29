@@ -7,9 +7,9 @@
     <string name="title_activity_edit_task">edit_task_activity</string>
     <string name="edit_task">Edit task</string>
     <string name="pick_date">Pick date</string>
-    <string name="category">category</string>
-    <string name="description">description</string>
-    <string name="title">title</string>
+    <string name="category">Category*</string>
+    <string name="description">Description*</string>
+    <string name="title">Title*</string>
     <string name="notification">Notification</string>
     <string name="add_task">Add Task</string>
     <string name="attach_file">Attach File</string>
