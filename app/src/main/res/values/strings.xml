@@ -12,4 +12,5 @@
     <string name="title">title</string>
     <string name="notification">Notification</string>
     <string name="add_task">Add Task</string>
+    <string name="attach_file">Attach File</string>
 </resources>

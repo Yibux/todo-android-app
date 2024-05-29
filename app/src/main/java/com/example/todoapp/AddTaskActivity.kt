@@ -1,10 +1,12 @@
 package com.example.todoapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +30,10 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     private lateinit var binding: AddTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
+    private var attachments: MutableList<String> = mutableListOf()
+    companion object {
+        const val PICK_FILE_REQUEST_CODE = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +52,32 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             val datePicker = DatePickerFragment()
             datePicker.show(supportFragmentManager, "datePicker")
         }
+
+        binding.attachFileButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            getContent.launch(intent)
+        }
+    }
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val clipData = result.data?.clipData
+            val uris = mutableListOf<String>()
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    val uri = clipData.getItemAt(i).uri
+                    attachments.add(uri.toString())
+                }
+            } else {
+                result.data?.data?.let { uri ->
+                    attachments.add(uri.toString())
+                }
+            }
+            binding.attachedFilesText.text = attachments.joinToString("\n")
+        }
     }
 
     override fun onDateSelected(year: Int, month: Int, day: Int) {
@@ -58,7 +90,9 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         val description = binding.descriptionEditText.text.toString()
         val category = binding.categoryEditText.text.toString()
         val endDate = LocalDate.now()
-//        val endDate = createDateFromString(binding.endDateEditText.text.toString())
+        //TODO: Add attachments
+        //TODO: change enddate to selectedDate
+        //val endDate = createDateFromString(binding.endDateEditText.text.toString())
         val notificationEnabled = binding.notificationSwitch.isChecked
 
         val task = Task(0,
@@ -69,7 +103,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             endDate,
             notificationEnabled,
             category,
-            emptyList())
+            attachments
+        )
 
         taskViewModel.addTask(task)
 

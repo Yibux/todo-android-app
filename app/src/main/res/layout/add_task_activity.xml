@@ -64,9 +64,21 @@
         android:id="@+id/notificationSwitch"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="0.05"
         android:text="@string/notification"
-        android:layout_weight="0.1"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <Button
+        android:id="@+id/attachFileButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/attach_file" />
+
+    <TextView
+        android:id="@+id/attachedFilesText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1" />
 
     <Button
         android:id="@+id/addTaskButton"

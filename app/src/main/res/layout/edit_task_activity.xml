@@ -58,16 +58,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="" />
+
     </LinearLayout>
 
-    <Switch
-        android:id="@+id/notificationSwitch"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:text="@string/notification"
-        android:layout_weight="0.1"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/notificationSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="@string/notification"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+        <CheckBox
+            android:id="@+id/statusCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="status" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/editTaskButton"

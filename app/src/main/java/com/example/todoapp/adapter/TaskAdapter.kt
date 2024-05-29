@@ -26,6 +26,13 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         val task = differ.currentList[position]
         binding.titleTextView.text = task.title
         binding.endDate.text = task.endDate.toString()
+        binding.categoryTextView.text = task.taskCategory
+        setIsCompletedImage(binding, task.isDone)
+
+        binding.isCompleted.setOnClickListener {
+            task.isDone = !task.isDone
+            setIsCompletedImage(binding, task.isDone)
+        }
 
         binding.root.setOnClickListener {
             val context = holder.itemView.context
@@ -34,6 +41,14 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             context.startActivity(intent)
+        }
+    }
+
+    private fun setIsCompletedImage(binding: TaskLayoutBinding, isDone: Boolean) {
+        if(isDone) {
+            binding.isCompleted.setImageResource(android.R.drawable.checkbox_on_background)
+        } else {
+            binding.isCompleted.setImageResource(android.R.drawable.checkbox_off_background)
         }
     }
 
