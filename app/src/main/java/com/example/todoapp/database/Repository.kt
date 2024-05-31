@@ -28,4 +28,8 @@ class Repository(private val todoDao: TodoDao) {
     suspend fun updateTodoItem(task: Task) {
         todoDao.updateTodoItem(task)
     }
+
+    suspend fun updateAttachments(id: Int, attachments: List<String>) {
+        todoDao.updateAttachments(id, attachments)
+    }
 }

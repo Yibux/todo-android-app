@@ -84,6 +84,19 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/attachFileButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/attach_file" />
+
+    <TextView
+        android:id="@+id/attachedFilesText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1" />
+
+
+    <Button
         android:id="@+id/editTaskButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"

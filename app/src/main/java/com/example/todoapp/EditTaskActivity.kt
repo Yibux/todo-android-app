@@ -1,8 +1,12 @@
 package com.example.todoapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.databinding.EditTaskActivityBinding
@@ -14,6 +18,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
     private lateinit var binding: EditTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
+    private lateinit var attachments: MutableList<String>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = EditTaskActivityBinding.inflate(layoutInflater)
@@ -24,12 +29,20 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
 
         val task: Task? = intent.getParcelableExtra("task", Task::class.java)
 
+        binding.titleEditText.addTextChangedListener(textWatcher)
+        binding.descriptionEditText.addTextChangedListener(textWatcher)
+        binding.categoryEditText.addTextChangedListener(textWatcher)
+        binding.dateText.addTextChangedListener(textWatcher)
+        activeTaskButton()
+
         binding.titleEditText.setText(task?.title)
         binding.categoryEditText.setText(task?.taskCategory)
         binding.dateText.text = task?.endDate.toString()
         binding.descriptionEditText.setText(task?.description)
         binding.statusCheckBox.isChecked = task?.isDone ?: false
         binding.statusCheckBox.text = if (task?.isDone == true) "status (Done)" else "status (Not Done)"
+        binding.attachedFilesText.text = task?.attachments?.joinToString("\n") ?: ""
+        attachments = task?.attachments?.toMutableList() ?: mutableListOf()
         //TODO: Add attachments
         //TODO: Add notifications
 
@@ -43,11 +56,55 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             val datePicker = DatePickerFragment()
             datePicker.show(supportFragmentManager, "datePicker")
         }
+
+        binding.attachFileButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            getContent.launch(intent)
+        }
     }
+
+    private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val clipData = result.data?.clipData
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    val uri = clipData.getItemAt(i).uri
+                    attachments.add(uri.toString())
+                }
+            } else {
+                result.data?.data?.let { uri ->
+                    attachments.add(uri.toString())
+                }
+            }
+            binding.attachedFilesText.text = attachments.joinToString("\n")
+        }
+    }
+
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            activeTaskButton()
+        }
+
+        override fun afterTextChanged(s: Editable?) {}
+    }
+
+    private fun activeTaskButton() {
+        binding.editTaskButton.isEnabled = binding.titleEditText.text!!.isNotEmpty() &&
+                binding.descriptionEditText.text!!.isNotEmpty() &&
+                binding.categoryEditText.text!!.isNotEmpty() &&
+                binding.dateText.text!!.isNotEmpty()
+    }
+
 
     override fun onDateSelected(year: Int, month: Int, day: Int) {
         selectedDate = LocalDate.of(year, month + 1, day)
         binding.dateText.text = selectedDate.toString()
+        activeTaskButton()
     }
 
     private fun editTask(task : Task?) {

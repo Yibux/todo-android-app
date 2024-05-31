@@ -13,4 +13,8 @@
     <string name="notification">Notification</string>
     <string name="add_task">Add Task</string>
     <string name="attach_file">Attach File</string>
+    <string name="title_activity_single_task_info">SingleTaskInfoActivity</string>
+    <string name="status">status</string>
+    <string name="delete_task">Delete task</string>
+    <string name="attachments">Attachments:</string>
 </resources>

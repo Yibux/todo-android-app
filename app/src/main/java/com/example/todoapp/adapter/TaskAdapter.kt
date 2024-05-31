@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.EditTaskActivity
+import com.example.todoapp.SingleTaskInfoActivity
 import com.example.todoapp.databinding.TaskLayoutBinding
 import com.example.todoapp.model.Task
 
@@ -36,7 +37,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
 
         binding.root.setOnClickListener {
             val context = holder.itemView.context
-            val intent = Intent(context, EditTaskActivity::class.java).apply {
+            val intent = Intent(context, SingleTaskInfoActivity::class.java).apply {
                 putExtra("task", task)
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
             }

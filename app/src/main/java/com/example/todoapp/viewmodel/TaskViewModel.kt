@@ -41,4 +41,10 @@ class TaskViewModel(applicaiton: Application): AndroidViewModel(applicaiton) {
     fun getTasks(): LiveData<List<Task>> {
         return readAllData
     }
+
+    fun updateAttachments(id: Int, attachments: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateAttachments(id, attachments)
+        }
+    }
 }

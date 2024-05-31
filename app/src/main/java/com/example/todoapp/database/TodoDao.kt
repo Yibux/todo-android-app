@@ -25,4 +25,7 @@ interface TodoDao {
 
     @Update
     suspend fun updateTodoItem(task: Task)
+
+    @Query("UPDATE tasks SET description = :attachments WHERE id = :id")
+    suspend fun updateAttachments(id: Int, attachments: List<String>)
 }
