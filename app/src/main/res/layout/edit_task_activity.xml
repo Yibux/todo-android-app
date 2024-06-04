@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/attachmentsRecyclerViewer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -89,18 +90,17 @@
         android:layout_height="wrap_content"
         android:text="@string/attach_file" />
 
-    <TextView
-        android:id="@+id/attachedFilesText"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/attachmentsRecyclerViewer2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.1" />
+        android:layout_height="wrap_content" />
 
 
     <Button
         android:id="@+id/editTaskButton"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="@string/edit_task"
-        android:layout_weight="0.1"/>
+        android:layout_weight="0.1"
+        android:text="@string/edit_task" />
 
 </LinearLayout>

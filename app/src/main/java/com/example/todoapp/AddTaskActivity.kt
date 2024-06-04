@@ -12,6 +12,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.database.Repository
 import com.example.todoapp.database.TodoDB
 import com.example.todoapp.database.TodoDao
@@ -33,9 +35,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
     private var attachments: MutableList<String> = mutableListOf()
-    companion object {
-        const val PICK_FILE_REQUEST_CODE = 1
-    }
+    private val attachmentAdapter by lazy { AttachmentAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,14 +76,30 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
-                    attachments.add(uri.toString())
+                    if(attachments.size == 1 && attachments[0].length == 0)
+                        attachments[0] = uri.toString()
+                    else
+                        attachments.add(uri.toString())
                 }
             } else {
                 result.data?.data?.let { uri ->
-                    attachments.add(uri.toString())
+                    if(attachments.size == 1 && attachments[0].length == 0)
+                        attachments[0] = uri.toString()
+                    else
+                        attachments.add(uri.toString())
                 }
             }
-            binding.attachedFilesText.text = attachments.joinToString("\n")
+//            binding.attachedFilesText.text = attachments.joinToString("\n")
+            runOnUiThread {
+                if(attachments.size != 1 || attachments[0].length != 0) {
+                    attachmentAdapter.differ.submitList(attachments)
+                    binding.attachmentsRecyclerViewer.apply {
+                        layoutManager = LinearLayoutManager(this@AddTaskActivity,
+                            LinearLayoutManager.VERTICAL, false)
+                        adapter = attachmentAdapter
+                    }
+                }
+            }
         }
     }
 

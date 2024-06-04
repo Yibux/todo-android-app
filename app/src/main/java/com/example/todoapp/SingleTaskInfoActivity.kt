@@ -7,12 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.AttachmentAdapter
-import com.example.todoapp.adapter.TaskAdapter
 import com.example.todoapp.databinding.TaskInfoActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
 
-class SingleTaskInfoActivity : ComponentActivity(), AttachmentAdapter.OnAttachmentDeletedListener {
+class SingleTaskInfoActivity : ComponentActivity() {
     private lateinit var binding: TaskInfoActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private val attachmentAdapter by lazy { AttachmentAdapter() }
@@ -36,7 +35,6 @@ class SingleTaskInfoActivity : ComponentActivity(), AttachmentAdapter.OnAttachme
         binding.statusCheckBox.isEnabled = false
         binding.notificationSwitch.isEnabled = false
         binding.notificationSwitch.isChecked = task?.notificationOn ?: false
-        attachmentAdapter.onAttachmentDeletedListener = this
 
         binding.editButton.setOnClickListener {
             val intent = Intent(this, EditTaskActivity::class.java)
@@ -55,17 +53,13 @@ class SingleTaskInfoActivity : ComponentActivity(), AttachmentAdapter.OnAttachme
             startActivity(intent)
         }
 
-        runOnUiThread {
-            attachmentAdapter.differ.submitList(task?.attachments)
-            binding.attachmentsRecyclerViewer.apply {
-                layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
-                    LinearLayoutManager.VERTICAL, false)
-                adapter = attachmentAdapter
-            }
-        }
-    }
-
-    override fun onAttachmentDeleted(id: Int) {
-        taskViewModel.updateAttachments(id, attachmentAdapter.differ.currentList)
+//        runOnUiThread {
+//            attachmentAdapter.differ.submitList(task?.attachments)
+//            binding.attachmentsRecyclerViewer.apply {
+//                layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
+//                    LinearLayoutManager.VERTICAL, false)
+//                adapter = attachmentAdapter
+//            }
+//        }
     }
 }

@@ -32,9 +32,17 @@ class AttachmentAdapter: RecyclerView.Adapter<AttachmentAdapter.ViewHolder>() {
 
         binding.attachmentText.text = attachment
 
+//        binding.deleteAttachmentButton.setOnClickListener {
+//            differ.currentList.removeAt(position)
+//            onAttachmentDeletedListener?.onAttachmentDeleted(position)
+//        }
         binding.deleteAttachmentButton.setOnClickListener {
-            differ.currentList.removeAt(position)
-            onAttachmentDeletedListener?.onAttachmentDeleted(position)
+            val currentList = differ.currentList.toMutableList()
+            if (position in currentList.indices) {
+                currentList.removeAt(position)
+                differ.submitList(currentList)
+                onAttachmentDeletedListener?.onAttachmentDeleted(position)
+            }
         }
     }
 

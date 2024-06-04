@@ -5,25 +5,31 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.EditTaskActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
 import java.time.LocalDate
 
-class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener {
+class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener,
+    AttachmentAdapter.OnAttachmentDeletedListener {
     private lateinit var binding: EditTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
     private lateinit var attachments: MutableList<String>
+    private val attachmentAdapter by lazy { AttachmentAdapter() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = EditTaskActivityBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        attachmentAdapter.onAttachmentDeletedListener = this
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
@@ -41,12 +47,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         binding.descriptionEditText.setText(task?.description)
         binding.statusCheckBox.isChecked = task?.isDone ?: false
         binding.statusCheckBox.text = if (task?.isDone == true) "status (Done)" else "status (Not Done)"
-        binding.attachedFilesText.text = task?.attachments?.joinToString("\n") ?: ""
         attachments = task?.attachments?.toMutableList() ?: mutableListOf()
-        //TODO: Add attachments
-        //TODO: Add notifications
-
-
 
         binding.editTaskButton.setOnClickListener {
             editTask(task)
@@ -64,6 +65,8 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             getContent.launch(intent)
         }
+
+        updateUI()
     }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -79,7 +82,20 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
                     attachments.add(uri.toString())
                 }
             }
-            binding.attachedFilesText.text = attachments.joinToString("\n")
+            updateUI()
+        }
+    }
+
+    private fun updateUI() {
+        runOnUiThread {
+            if (attachments.isNotEmpty() && (attachments.size != 1 || attachments[0].isNotEmpty())) {
+                attachmentAdapter.differ.submitList(attachments)
+                binding.attachmentsRecyclerViewer2.apply {
+                    layoutManager = LinearLayoutManager(this@EditTaskActivity,
+                        LinearLayoutManager.VERTICAL, false)
+                    adapter = attachmentAdapter
+                }
+            }
         }
     }
 
@@ -100,14 +116,13 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
                 binding.dateText.text!!.isNotEmpty()
     }
 
-
     override fun onDateSelected(year: Int, month: Int, day: Int) {
         selectedDate = LocalDate.of(year, month + 1, day)
         binding.dateText.text = selectedDate.toString()
         activeTaskButton()
     }
 
-    private fun editTask(task : Task?) {
+    private fun editTask(task: Task?) {
         if (task == null) {
             return
         }
@@ -116,10 +131,16 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         task.endDate = selectedDate
         task.description = binding.descriptionEditText.text.toString()
         task.isDone = binding.statusCheckBox.isChecked
+        task.attachments = attachments
         taskViewModel.updateTask(task)
 
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+    }
+
+    override fun onAttachmentDeleted(id: Int) {
+        attachments.removeAt(id)
+        updateUI()
     }
 }
