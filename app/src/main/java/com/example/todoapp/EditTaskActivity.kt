@@ -134,8 +134,9 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         task.attachments = attachments
         taskViewModel.updateTask(task)
 
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val intent = Intent(this, SingleTaskInfoActivity::class.java)
+        intent.putExtra("task", task)
+        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         startActivity(intent)
     }
 

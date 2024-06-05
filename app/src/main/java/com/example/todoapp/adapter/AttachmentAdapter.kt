@@ -29,13 +29,10 @@ class AttachmentAdapter: RecyclerView.Adapter<AttachmentAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: AttachmentAdapter.ViewHolder, position: Int) {
         val binding = AttachmentFragmentBinding.bind(holder.itemView)
         val attachment: String? = differ.currentList[position]
+        val attachmentSplit = attachment?.split("\n")
 
-        binding.attachmentText.text = attachment
+        binding.attachmentText.text = attachmentSplit?.get(1)
 
-//        binding.deleteAttachmentButton.setOnClickListener {
-//            differ.currentList.removeAt(position)
-//            onAttachmentDeletedListener?.onAttachmentDeleted(position)
-//        }
         binding.deleteAttachmentButton.setOnClickListener {
             val currentList = differ.currentList.toMutableList()
             if (position in currentList.indices) {

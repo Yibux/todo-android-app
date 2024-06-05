@@ -2,33 +2,22 @@ package com.example.todoapp
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.AttachmentAdapter
-import com.example.todoapp.database.Repository
-import com.example.todoapp.database.TodoDB
-import com.example.todoapp.database.TodoDao
 import com.example.todoapp.databinding.AddTaskActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.google.type.Date
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.Locale
-import java.util.UUID
-
 
 class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener {
     private lateinit var binding: AddTaskActivityBinding
@@ -82,14 +71,16 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
                         attachments.add(uri.toString())
                 }
             } else {
-                result.data?.data?.let { uri ->
-                    if(attachments.size == 1 && attachments[0].length == 0)
-                        attachments[0] = uri.toString()
-                    else
-                        attachments.add(uri.toString())
+                val uri = result.data?.data
+                val fileName = getFileNameFromUri(uri)
+                if(attachments.size == 1 && attachments[0].length == 0) {
+                    attachments[0] = uri.toString() + "\n" + fileName.toString()
+                }
+                else {
+                    attachments.add(uri.toString() + "\n" + fileName.toString())
                 }
             }
-//            binding.attachedFilesText.text = attachments.joinToString("\n")
+
             runOnUiThread {
                 if(attachments.size != 1 || attachments[0].length != 0) {
                     attachmentAdapter.differ.submitList(attachments)
@@ -101,6 +92,19 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
                 }
             }
         }
+    }
+
+    private fun getFileNameFromUri(uri: Uri?): String? {
+        var fileName: String? = null
+        val cursor = contentResolver.query(uri!!, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if(displayNameIndex != -1)
+                    fileName = it.getString(displayNameIndex)
+            }
+        }
+        return fileName
     }
 
 

@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.todoapp.adapter.AttachmentAdapter
+import com.example.todoapp.adapter.ViewAttachmentAdapter
 import com.example.todoapp.databinding.TaskInfoActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
@@ -14,7 +14,7 @@ import com.example.todoapp.viewmodel.TaskViewModel
 class SingleTaskInfoActivity : ComponentActivity() {
     private lateinit var binding: TaskInfoActivityBinding
     private lateinit var taskViewModel: TaskViewModel
-    private val attachmentAdapter by lazy { AttachmentAdapter() }
+    private val viewAttachmentAdapter by lazy { ViewAttachmentAdapter() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,13 +53,13 @@ class SingleTaskInfoActivity : ComponentActivity() {
             startActivity(intent)
         }
 
-//        runOnUiThread {
-//            attachmentAdapter.differ.submitList(task?.attachments)
-//            binding.attachmentsRecyclerViewer.apply {
-//                layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
-//                    LinearLayoutManager.VERTICAL, false)
-//                adapter = attachmentAdapter
-//            }
-//        }
+        runOnUiThread {
+            viewAttachmentAdapter.differ.submitList(task?.attachments)
+            binding.attachmentsRecyclerViewer.apply {
+                layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
+                    LinearLayoutManager.VERTICAL, false)
+                adapter = viewAttachmentAdapter
+            }
+        }
     }
 }

@@ -17,4 +17,6 @@
     <string name="status">status</string>
     <string name="delete_task">Delete task</string>
     <string name="attachments">Attachments:</string>
+    <string name="channel_name">task_channel\n</string>
+    <string name="channel_description">task_message</string>
 </resources>

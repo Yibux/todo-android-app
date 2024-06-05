@@ -22,4 +22,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:contentDescription="ADD TASK"
         android:layout_margin="25dp"/>
+
+    <TextView
+        android:id="@+id/time_left_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time left: 0s"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -71,6 +71,9 @@ dependencies {
 
     implementation("com.google.android.material:material:1.9.0")
 
+    //scheduler
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
