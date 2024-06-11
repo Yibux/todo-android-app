@@ -11,6 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -31,10 +34,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var addTaskButton: FloatingActionButton
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var taskRecycleViewer: RecyclerView
+    private lateinit var searchTask : EditText
     private val taskAdapter by lazy { TaskAdapter() }
     private var taskNumber: Int = 0
     private lateinit var handler: Handler
-    private val interval = 60 * 1000L // 15 minutes in milliseconds
+    private val interval = 15 * 60 * 1000L // 15 minutes in milliseconds
     private lateinit var timeLeftText: TextView
     private var timeLeft = interval
 
@@ -45,6 +49,28 @@ class MainActivity : ComponentActivity() {
         addTaskButton = findViewById(R.id.task_fab)
         taskRecycleViewer = findViewById(R.id.taskList)
         timeLeftText = findViewById(R.id.time_left_text)
+        searchTask = findViewById(R.id.searchTask)
+
+        // Search task by title
+        searchTask.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                taskViewModel.getTasks().value?.let { tasks ->
+                    val filteredTasks = tasks.sortedWith(compareBy { it.endDate })
+                        .filter { it.title.contains(s.toString(), true) }
+                    taskAdapter.differ.submitList(filteredTasks)
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+        //jobscheduler
+        //ile przed zakonczeniem zadania dostajemy powiadomienie
+        //przycisk w powiadominiuu po nacisnieciu przenosi do aplikacji (osobny przycisk)
+        // i przenosim y
+        // się do zadania konkretnego
+        //kopiowac zalaczniki do folderu aplikacji
 
         // Notification
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -66,8 +92,9 @@ class MainActivity : ComponentActivity() {
             taskNumber = tasks.filter {
                 it.endDate == LocalDate.now() && it.notificationOn && !it.isDone
             }.size
+            val tasksToSubmit = tasks.sortedWith(compareBy { it.endDate})
             runOnUiThread {
-                taskAdapter.differ.submitList(tasks)
+                taskAdapter.differ.submitList(tasksToSubmit)
                 val context = this@MainActivity
                 taskRecycleViewer.apply {
                     layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -124,17 +151,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun createNotificationChannel(channelID: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.channel_name)
-            val descriptionText = getString(R.string.channel_description)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(channelID, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val name = getString(R.string.channel_name)
+        val descriptionText = getString(R.string.channel_description)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(channelID, name, importance).apply {
+            description = descriptionText
         }
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun startRepeatingNotification(channelId: String) {

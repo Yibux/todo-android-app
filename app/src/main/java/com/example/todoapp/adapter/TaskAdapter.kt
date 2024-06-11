@@ -39,7 +39,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
             val context = holder.itemView.context
             val intent = Intent(context, SingleTaskInfoActivity::class.java).apply {
                 putExtra("task", task)
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             context.startActivity(intent)
         }

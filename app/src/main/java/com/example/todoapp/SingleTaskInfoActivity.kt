@@ -15,6 +15,8 @@ class SingleTaskInfoActivity : ComponentActivity() {
     private lateinit var binding: TaskInfoActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private val viewAttachmentAdapter by lazy { ViewAttachmentAdapter() }
+    private val REQUEST_CODE_OPEN_DOCUMENT = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -54,11 +56,13 @@ class SingleTaskInfoActivity : ComponentActivity() {
         }
 
         runOnUiThread {
-            viewAttachmentAdapter.differ.submitList(task?.attachments)
-            binding.attachmentsRecyclerViewer.apply {
-                layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
-                    LinearLayoutManager.VERTICAL, false)
-                adapter = viewAttachmentAdapter
+            if(task?.attachments?.get(0)?.isNotEmpty() == true) {
+                viewAttachmentAdapter.differ.submitList(task.attachments)
+                binding.attachmentsRecyclerViewer.apply {
+                    layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
+                        LinearLayoutManager.VERTICAL, false)
+                    adapter = viewAttachmentAdapter
+                }
             }
         }
     }

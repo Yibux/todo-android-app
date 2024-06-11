@@ -36,5 +36,5 @@ data class Task(
     var taskCategory : String = "",
 
     @ColumnInfo(name = "attachments")
-    var attachments : List<String> = emptyList()
+    var attachments : List<String>? = null
 ) : Parcelable

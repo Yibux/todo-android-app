@@ -2,7 +2,9 @@ package com.example.todoapp
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,16 +77,38 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
-                    attachments.add(uri.toString())
+                    if(attachments.size == 1 && attachments[0].length == 0)
+                        attachments[0] = uri.toString()
+                    else
+                        attachments.add(uri.toString())
                 }
             } else {
-                result.data?.data?.let { uri ->
-                    attachments.add(uri.toString())
+                val uri = result.data?.data
+                val fileName = getFileNameFromUri(uri)
+                if(attachments.size == 1 && attachments[0].length == 0) {
+                    attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
+                else {
+                    attachments.add(uri.toString() + "\n" + fileName.toString())
+                }
+                updateUI()
             }
-            updateUI()
         }
     }
+
+    private fun getFileNameFromUri(uri: Uri?): String? {
+        var fileName: String? = null
+        val cursor = contentResolver.query(uri!!, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if(displayNameIndex != -1)
+                    fileName = it.getString(displayNameIndex)
+            }
+        }
+        return fileName
+    }
+
 
     private fun updateUI() {
         runOnUiThread {
@@ -136,7 +160,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
 
         val intent = Intent(this, SingleTaskInfoActivity::class.java)
         intent.putExtra("task", task)
-        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+//        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         startActivity(intent)
     }
 

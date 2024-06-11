@@ -4,12 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05"/>
+
+    <EditText
+        android:id="@+id/searchTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@+id/guideline"
+        android:hint="Search for a task"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/taskList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/searchTask" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/task_fab"
@@ -27,7 +42,8 @@
         android:id="@+id/time_left_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time left: 0s"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:text="Time left: 0s"
+        app:layout_constraintTop_toBottomOf="@id/taskList" />
 </androidx.constraintlayout.widget.ConstraintLayout>

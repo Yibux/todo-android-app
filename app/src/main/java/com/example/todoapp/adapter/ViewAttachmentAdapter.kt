@@ -24,19 +24,22 @@ class ViewAttachmentAdapter: RecyclerView.Adapter<ViewAttachmentAdapter.ViewHold
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val attachment: String = differ.currentList[position]
-        val attachmentSplit = attachment.split("\n")
-        val attachmentUri = Uri.parse(attachmentSplit[0])
-        val fileName = attachmentSplit[1]
+        if (position < differ.currentList.size) {
+            val attachment: String = differ.currentList[position]
+            val attachmentSplit = attachment.split("\n")
+            val attachmentUri = Uri.parse(attachmentSplit[0])
+            val fileName = attachmentSplit[1]
 
-        binding.attachmentText.text = fileName
+            binding.attachmentText.text = fileName
 
-        holder.itemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            intent.setDataAndType(attachmentUri, "application/*")
+            holder.itemView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    setDataAndType(attachmentUri, "*/*")
+                }
 
-            startActivity(holder.itemView.context, intent, null)
+                startActivity(holder.itemView.context, intent, null)
+            }
         }
     }
 
@@ -53,6 +56,4 @@ class ViewAttachmentAdapter: RecyclerView.Adapter<ViewAttachmentAdapter.ViewHold
     }
 
     val differ = AsyncListDiffer(this, diffCallback)
-
-
 }

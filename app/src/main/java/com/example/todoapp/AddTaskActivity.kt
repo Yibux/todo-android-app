@@ -94,7 +94,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         }
     }
 
-    private fun getFileNameFromUri(uri: Uri?): String? {
+    fun getFileNameFromUri(uri: Uri?): String? {
         var fileName: String? = null
         val cursor = contentResolver.query(uri!!, null, null, null, null)
         cursor?.use {
@@ -136,6 +136,9 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         val description = binding.descriptionEditText.text.toString()
         val category = binding.categoryEditText.text.toString()
         val endDate = LocalDate.now()
+        var newAttachments: List<String>? = null
+        if(attachments.size != 1 || attachments[0].length != 0)
+            newAttachments = attachments
         //TODO: Add attachments
         //TODO: change enddate to selectedDate
         //val endDate = createDateFromString(binding.endDateEditText.text.toString())
@@ -149,7 +152,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             endDate,
             notificationEnabled,
             category,
-            attachments
+            newAttachments
         )
 
         taskViewModel.addTask(task)
