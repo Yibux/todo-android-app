@@ -47,4 +47,8 @@ class TaskViewModel(applicaiton: Application): AndroidViewModel(applicaiton) {
             repository.updateAttachments(id, attachments)
         }
     }
+
+    fun getTaskById(id: Int): LiveData<Task?> {
+        return repository.getTodoById(id)
+    }
 }

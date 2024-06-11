@@ -120,9 +120,12 @@ class MainActivity : ComponentActivity() {
 
     private fun createAndShowNotification(taskCount: Int, channelId: String) {
         val notificationText = "You have $taskCount task to do today."
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, SingleTaskInfoActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        intent.putExtra("task", taskViewModel.getTasks().value?.find {
+            it.endDate == LocalDate.now() && it.notificationOn && !it.isDone
+        })
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_IMMUTABLE
