@@ -64,6 +64,47 @@ class AlarmReceiver : BroadcastReceiver() {
         }
     }
     companion object {
+        fun createNotification(context: Context, task: Task) {
+            val channelId = "task_channel"
+            val notificationText = "Task '${task.title}' is due today."
+
+            val contentIntent = Intent(context, SingleTaskInfoActivity::class.java).apply {
+                putExtra("TASK_ID", task.id)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                task.id,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val notificationBuilder = context.let {
+                NotificationCompat.Builder(it, channelId)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setContentTitle("Task Reminder")
+                    .setContentText(notificationText)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent) // Set content intent
+                    .setAutoCancel(true)
+            } ?: return // Early exit if context is null
+
+            val notificationId = task.id // Use task ID as notification ID
+
+            with(NotificationManagerCompat.from(context)) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Handle permission denial more gracefully (e.g., show a dialog)
+                    // For now, just log a message
+                    Log.w("NotificationReceiver", "Missing POST_NOTIFICATIONS permission")
+                    return
+                }
+                notify(notificationId, notificationBuilder.build())
+            }
+        }
         fun startAlarm(
             context: Context,
             interval: Long,

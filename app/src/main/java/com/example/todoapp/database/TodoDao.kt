@@ -18,7 +18,7 @@ interface TodoDao {
     fun getTodoById(id: Int): LiveData<Task?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addTodoItem(task: Task)
+    suspend fun addTodoItem(task: Task) : Long
 
     @Delete
     suspend fun deleteTodoItem(task: Task)

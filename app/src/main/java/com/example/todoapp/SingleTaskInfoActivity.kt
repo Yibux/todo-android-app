@@ -17,9 +17,8 @@ class SingleTaskInfoActivity : ComponentActivity() {
     private lateinit var binding: TaskInfoActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private val viewAttachmentAdapter by lazy { ViewAttachmentAdapter() }
-    private val REQUEST_CODE_OPEN_DOCUMENT = 1
 
-    val callback = object : OnBackPressedCallback(true) { // Enabled by default
+    private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             startActivity(Intent(this@SingleTaskInfoActivity, MainActivity::class.java))
             finish()
@@ -37,11 +36,9 @@ class SingleTaskInfoActivity : ComponentActivity() {
         setContentView(view)
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
-        val task_id: Int = intent.getIntExtra("task_id", 0)
-        //convert na stringa
-        val task: LiveData<Task?> = taskViewModel.getTaskById(task_id)
+        val taskId: Int = intent.getIntExtra("task_id", 0)
 
-        taskViewModel.getTaskById(task_id).observe(this) { task ->
+        taskViewModel.getTaskById(taskId).observe(this) { task ->
             binding.titleText.text = "Title: " + task?.title
             binding.categoryText.text = "Category: " + task?.taskCategory
             binding.dateText.text = "Date: " + task?.endDate.toString()
@@ -60,26 +57,32 @@ class SingleTaskInfoActivity : ComponentActivity() {
                 }
                 startActivity(intent)
             }
-        }
 
+            binding.editButton.setOnClickListener {
+                val intent = Intent(this, EditTaskActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+                intent.putExtra("task_id", task?.id)
+                startActivity(intent)
+            }
 
-        runOnUiThread {
-            if(task.value?.attachments?.get(0)?.isNotEmpty() == true) {
-                viewAttachmentAdapter.differ.submitList(task.value?.attachments)
-                binding.attachmentsRecyclerViewer.apply {
-                    layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
-                        LinearLayoutManager.VERTICAL, false)
-                    adapter = viewAttachmentAdapter
+            runOnUiThread {
+                if(task?.attachments?.get(0)?.isNotEmpty() == true) {
+                    viewAttachmentAdapter.differ.submitList(task.attachments)
+                    binding.attachmentsRecyclerViewer.apply {
+                        layoutManager = LinearLayoutManager(this@SingleTaskInfoActivity,
+                            LinearLayoutManager.VERTICAL, false)
+                        adapter = viewAttachmentAdapter
+                    }
+                } else {
+                    binding.attachmentsText.text = "@string/no_attachments"
                 }
             }
         }
 
-        binding.editButton.setOnClickListener {
-            val intent = Intent(this, EditTaskActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-            intent.putExtra("task", task.value?.id)
-            startActivity(intent)
-        }
+
+
+
+
 
 
     }

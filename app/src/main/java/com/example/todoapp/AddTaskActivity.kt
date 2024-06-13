@@ -12,11 +12,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.AddTaskActivityBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.receiver.AlarmReceiver
+import com.example.todoapp.receiver.AlarmReceiver.Companion.startAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener {
@@ -137,25 +141,33 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         val category = binding.categoryEditText.text.toString()
         val endDate = LocalDate.now()
         var newAttachments: List<String>? = null
-        if(attachments.size != 1 || attachments[0].length != 0)
+        if(attachments.size != 1 || attachments[0].length != 0) {
             newAttachments = attachments
-        //TODO: Add attachments
-        //TODO: change enddate to selectedDate
-        //val endDate = createDateFromString(binding.endDateEditText.text.toString())
+        }
         val notificationEnabled = binding.notificationSwitch.isChecked
 
         val task = Task(0,
             title,
             description,
             false,
-            LocalDate.now(),
+            selectedDate,
             endDate,
             notificationEnabled,
             category,
             newAttachments
         )
+        var newTaskId: Long
+        lifecycleScope.launch {
+            newTaskId = taskViewModel.addTask(task)
+            task.id = newTaskId.toInt()
+            if(notificationEnabled) {
+                val twentyMinutes : Long = 20 * 60 * 1000
+                Toast.makeText(this@AddTaskActivity, "Notification added", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        taskViewModel.addTask(task)
+        AlarmReceiver.createNotification(this, task)
+
 
         Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show()
 

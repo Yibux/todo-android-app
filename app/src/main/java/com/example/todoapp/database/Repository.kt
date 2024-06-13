@@ -17,8 +17,8 @@ class Repository(private val todoDao: TodoDao) {
         return todoDao.getTodoById(id)
     }
 
-    suspend fun addTodoItem(task: Task) {
-        todoDao.addTodoItem(task)
+    suspend fun addTodoItem(task: Task) : Long {
+        return todoDao.addTodoItem(task)
     }
 
     suspend fun deleteTodoItem(task: Task) {

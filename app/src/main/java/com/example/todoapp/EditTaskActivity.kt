@@ -22,7 +22,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
     private lateinit var binding: EditTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
-    private lateinit var attachments: MutableList<String>
+    private var attachments: MutableList<String> = mutableListOf()
     private val attachmentAdapter by lazy { AttachmentAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
-        val task: Task? = intent.getParcelableExtra("task", Task::class.java)
+        val task_id: Int = intent.getIntExtra("task_id", 0)
 
         binding.titleEditText.addTextChangedListener(textWatcher)
         binding.descriptionEditText.addTextChangedListener(textWatcher)
@@ -43,17 +43,24 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         binding.dateText.addTextChangedListener(textWatcher)
         activeTaskButton()
 
-        binding.titleEditText.setText(task?.title)
-        binding.categoryEditText.setText(task?.taskCategory)
-        binding.dateText.text = task?.endDate.toString()
-        binding.descriptionEditText.setText(task?.description)
-        binding.statusCheckBox.isChecked = task?.isDone ?: false
-        binding.statusCheckBox.text = if (task?.isDone == true) "status (Done)" else "status (Not Done)"
-        attachments = task?.attachments?.toMutableList() ?: mutableListOf()
-
-        binding.editTaskButton.setOnClickListener {
-            editTask(task)
+        taskViewModel.getTaskById(task_id).observe(this) { task ->
+            if(task == null) {
+                return@observe
+            }
+            binding.titleEditText.setText(task.title)
+            binding.categoryEditText.setText(task.taskCategory)
+            binding.dateText.text = task.endDate.toString()
+            binding.descriptionEditText.setText(task.description)
+            binding.statusCheckBox.isChecked = task.isDone
+            binding.statusCheckBox.text = if (task.isDone) "status (Done)" else "status (Not Done)"
+            attachments = task.attachments!!.toMutableList()
+            binding.editTaskButton.setOnClickListener {
+                editTask(task)
+            }
+            updateUI()
         }
+
+
 
         binding.pickDate.setOnClickListener {
             val datePicker = DatePickerFragment()

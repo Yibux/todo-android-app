@@ -48,8 +48,8 @@ class MainActivity : ComponentActivity() {
         addTaskButton = findViewById(R.id.task_fab)
         taskRecycleViewer = findViewById(R.id.taskList)
         searchTask = findViewById(R.id.searchTask)
+        AlarmReceiver.createNotificationChannel("task_channel", this)
 
-        // Search task by title
         searchTask.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 

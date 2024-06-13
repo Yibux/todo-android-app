@@ -19,4 +19,5 @@
     <string name="attachments">Attachments:</string>
     <string name="channel_name">task_channel\n</string>
     <string name="channel_description">task_message</string>
+    <string name="no_attachments">No attachments</string>
 </resources>

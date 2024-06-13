@@ -10,20 +10,18 @@ import com.example.todoapp.model.Task
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TaskViewModel(applicaiton: Application): AndroidViewModel(applicaiton) {
+class TaskViewModel(application: Application): AndroidViewModel(application) {
     private var readAllData: LiveData<List<Task>>
     private var repository: Repository
 
     init {
-        val todoDao = TodoDB.getDatabase(applicaiton).todoDao()
+        val todoDao = TodoDB.getDatabase(application).todoDao()
         repository = Repository(todoDao)
         readAllData = repository.getTodos()
     }
 
-    fun addTask(task: Task) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.addTodoItem(task)
-        }
+    suspend fun addTask(task: Task) : Long {
+        return repository.addTodoItem(task)
     }
 
     fun updateTask(task: Task) {
