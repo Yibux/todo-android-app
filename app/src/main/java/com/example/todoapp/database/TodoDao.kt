@@ -17,8 +17,11 @@ interface TodoDao {
     @Query("SELECT * FROM tasks WHERE id=(:id)")
     fun getTodoById(id: Int): LiveData<Task?>
 
+    @Query("SELECT MAX(id) FROM tasks")
+    fun getMaxId(): Int
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addTodoItem(task: Task) : Long
+    suspend fun addTodoItem(task: Task)
 
     @Delete
     suspend fun deleteTodoItem(task: Task)

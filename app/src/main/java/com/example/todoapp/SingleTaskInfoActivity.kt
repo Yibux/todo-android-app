@@ -2,6 +2,7 @@ package com.example.todoapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -36,7 +37,12 @@ class SingleTaskInfoActivity : ComponentActivity() {
         setContentView(view)
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
-        val taskId: Int = intent.getIntExtra("task_id", 0)
+        val taskId: Int = intent.getIntExtra("task_id", -1)
+        if (taskId == -1) {
+            // Handle the case where the task ID was not found
+            Log.e("SingleTaskInfoActivity", "No task ID found in intent extras")
+            return
+        }
 
         taskViewModel.getTaskById(taskId).observe(this) { task ->
             binding.titleText.text = "Title: " + task?.title
@@ -78,12 +84,5 @@ class SingleTaskInfoActivity : ComponentActivity() {
                 }
             }
         }
-
-
-
-
-
-
-
     }
 }

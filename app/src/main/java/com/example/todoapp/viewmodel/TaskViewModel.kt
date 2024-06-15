@@ -9,6 +9,7 @@ import com.example.todoapp.database.TodoDB
 import com.example.todoapp.model.Task
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TaskViewModel(application: Application): AndroidViewModel(application) {
     private var readAllData: LiveData<List<Task>>
@@ -20,8 +21,10 @@ class TaskViewModel(application: Application): AndroidViewModel(application) {
         readAllData = repository.getTodos()
     }
 
-    suspend fun addTask(task: Task) : Long {
-        return repository.addTodoItem(task)
+    fun addTask(task: Task) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addTodoItem(task)
+        }
     }
 
     fun updateTask(task: Task) {
@@ -48,5 +51,11 @@ class TaskViewModel(application: Application): AndroidViewModel(application) {
 
     fun getTaskById(id: Int): LiveData<Task?> {
         return repository.getTodoById(id)
+    }
+
+    suspend fun getMaxId(): Int {
+        return withContext(Dispatchers.IO) {
+            repository.getMaxId()
+        }
     }
 }

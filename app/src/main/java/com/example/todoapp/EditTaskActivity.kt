@@ -7,14 +7,21 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.EditTaskActivityBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.receiver.AlarmReceiver
 import com.example.todoapp.viewmodel.TaskViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener,
@@ -35,7 +42,11 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
-        val task_id: Int = intent.getIntExtra("task_id", 0)
+        val taskId: Int = intent.getIntExtra("task_id", -1)
+        if (taskId == -1) {
+            Log.e("EditTaskActivity", "Invalid task ID")
+            return
+        }
 
         binding.titleEditText.addTextChangedListener(textWatcher)
         binding.descriptionEditText.addTextChangedListener(textWatcher)
@@ -43,7 +54,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         binding.dateText.addTextChangedListener(textWatcher)
         activeTaskButton()
 
-        taskViewModel.getTaskById(task_id).observe(this) { task ->
+        taskViewModel.getTaskById(taskId).observe(this) { task ->
             if(task == null) {
                 return@observe
             }
@@ -51,6 +62,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             binding.categoryEditText.setText(task.taskCategory)
             binding.dateText.text = task.endDate.toString()
             binding.descriptionEditText.setText(task.description)
+            binding.notificationSwitch.isChecked = task.notificationOn
             binding.statusCheckBox.isChecked = task.isDone
             binding.statusCheckBox.text = if (task.isDone) "status (Done)" else "status (Not Done)"
             attachments = task.attachments!!.toMutableList()
@@ -162,12 +174,20 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         task.endDate = selectedDate
         task.description = binding.descriptionEditText.text.toString()
         task.isDone = binding.statusCheckBox.isChecked
+        task.notificationOn = binding.notificationSwitch.isChecked
         task.attachments = attachments
-        taskViewModel.updateTask(task)
+        lifecycleScope.launch(Dispatchers.IO) {
+            taskViewModel.updateTask(task)
+            if (binding.notificationSwitch.isChecked) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@EditTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
+                }
+                AlarmReceiver.createNotification(this@EditTaskActivity, task)
+            }
+        }
 
         val intent = Intent(this, SingleTaskInfoActivity::class.java)
-        intent.putExtra("task", task)
-//        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        intent.putExtra("task_id", task.id)
         startActivity(intent)
     }
 

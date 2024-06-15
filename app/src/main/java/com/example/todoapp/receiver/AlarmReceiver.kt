@@ -69,7 +69,7 @@ class AlarmReceiver : BroadcastReceiver() {
             val notificationText = "Task '${task.title}' is due today."
 
             val contentIntent = Intent(context, SingleTaskInfoActivity::class.java).apply {
-                putExtra("TASK_ID", task.id)
+                putExtra("task_id", task.id)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             val pendingIntent = PendingIntent.getActivity(
@@ -85,11 +85,11 @@ class AlarmReceiver : BroadcastReceiver() {
                     .setContentTitle("Task Reminder")
                     .setContentText(notificationText)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent) // Set content intent
+                    .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
-            } ?: return // Early exit if context is null
+            }
 
-            val notificationId = task.id // Use task ID as notification ID
+            val notificationId = task.id
 
             with(NotificationManagerCompat.from(context)) {
                 if (ActivityCompat.checkSelfPermission(
@@ -97,8 +97,6 @@ class AlarmReceiver : BroadcastReceiver() {
                         android.Manifest.permission.POST_NOTIFICATIONS
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    // Handle permission denial more gracefully (e.g., show a dialog)
-                    // For now, just log a message
                     Log.w("NotificationReceiver", "Missing POST_NOTIFICATIONS permission")
                     return
                 }

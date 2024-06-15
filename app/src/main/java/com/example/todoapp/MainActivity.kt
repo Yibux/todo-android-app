@@ -23,6 +23,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.adapter.TaskAdapter
@@ -30,6 +31,9 @@ import com.example.todoapp.receiver.AlarmReceiver
 import com.example.todoapp.receiver.AlarmReceiver.Companion.startAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +41,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var taskRecycleViewer: RecyclerView
     private lateinit var searchTask : EditText
+    private lateinit var timeLeftText: TextView
     private val taskAdapter by lazy { TaskAdapter() }
     private var taskNumber: Int = 0
     private lateinit var handler: Handler
@@ -48,6 +53,7 @@ class MainActivity : ComponentActivity() {
         addTaskButton = findViewById(R.id.task_fab)
         taskRecycleViewer = findViewById(R.id.taskList)
         searchTask = findViewById(R.id.searchTask)
+        timeLeftText = findViewById(R.id.time_left_text)
         AlarmReceiver.createNotificationChannel("task_channel", this)
 
         searchTask.addTextChangedListener(object : TextWatcher {
@@ -88,6 +94,7 @@ class MainActivity : ComponentActivity() {
             taskNumber = tasks.filter {
                 it.endDate == LocalDate.now() && it.notificationOn && !it.isDone
             }.size
+
             val tasksToSubmit = tasks.sortedWith(compareBy { it.endDate})
             runOnUiThread {
                 taskAdapter.differ.submitList(tasksToSubmit)
@@ -99,8 +106,17 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+//        lifecycleScope.launch {
+//            val maxId = taskViewModel.getMaxId()
+//            withContext(Dispatchers.Main) {
+//                timeLeftText.text = "max id: $maxId"
+//                print(maxId)
+//            }
+//        }
 
         handler = Handler(Looper.getMainLooper())
+
+
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -112,75 +128,4 @@ class MainActivity : ComponentActivity() {
             // Permission is denied
         }
     }
-
-//    private fun createAndShowNotification(taskCount: Int, channelId: String) {
-//        val notificationText = "You have $taskCount task to do today."
-//        val intent = Intent(this, SingleTaskInfoActivity::class.java).apply {
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        }
-//        intent.putExtra("task", taskViewModel.getTasks().value?.find {
-//            it.endDate == LocalDate.now() && it.notificationOn && !it.isDone
-//        })
-//
-//        val pendingIntent: PendingIntent = PendingIntent.getActivity(
-//            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
-//        )
-//
-//        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-//            .setSmallIcon(R.drawable.ic_notification)
-//            .setContentTitle("Tasks")
-//            .setContentText(notificationText)
-//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//            .setContentIntent(pendingIntent)
-//            .setAutoCancel(true)
-//
-//        val notificationId = 1
-//        with(NotificationManagerCompat.from(this)) {
-//            if (ActivityCompat.checkSelfPermission(
-//                    this@MainActivity,
-//                    Manifest.permission.POST_NOTIFICATIONS
-//                ) != PackageManager.PERMISSION_GRANTED
-//            ) {
-//                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                return
-//            }
-//            notify(notificationId, notificationBuilder.build())
-//        }
-//    }
-
-//    private fun createNotificationChannel(channelID: String) {
-//        val name = getString(R.string.channel_name)
-//        val descriptionText = getString(R.string.channel_description)
-//        val importance = NotificationManager.IMPORTANCE_DEFAULT
-//        val channel = NotificationChannel(channelID, name, importance).apply {
-//            description = descriptionText
-//        }
-//        val notificationManager: NotificationManager =
-//            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//        notificationManager.createNotificationChannel(channel)
-//    }
-
-//    private fun startRepeatingNotification(channelId: String) {
-//        handler.post(object : Runnable {
-//            override fun run() {
-//                createAndShowNotification(taskNumber, channelId)
-//                handler.postDelayed(this, interval)
-//            }
-//        })
-//    }
-
-//    private fun startCountdown() {
-//        handler.post(object : Runnable {
-//            override fun run() {
-//                timeLeft -= 1000
-//                timeLeftText.text = "Time left: ${timeLeft / 1000 / 60}m ${(timeLeft / 1000) % 60}s"
-//
-//                if (timeLeft <= 0) {
-//                    timeLeft = interval
-//                }
-//
-//                handler.postDelayed(this, 1000)
-//            }
-//        })
-//    }
 }

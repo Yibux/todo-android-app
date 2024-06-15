@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
+import android.widget.Toast.makeText
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +22,12 @@ import com.example.todoapp.model.Task
 import com.example.todoapp.receiver.AlarmReceiver
 import com.example.todoapp.receiver.AlarmReceiver.Companion.startAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener {
@@ -46,7 +53,9 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         binding.dateText.addTextChangedListener(textWatcher)
 
         binding.addTaskButton.setOnClickListener {
-            addTask()
+            lifecycleScope.launch(Dispatchers.IO) {
+                addTask()
+            }
         }
 
         binding.pickDate.setOnClickListener {
@@ -135,7 +144,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         activeTaskButton()
     }
 
-    private fun addTask() {
+    private suspend fun addTask() {
         val title = binding.titleEditText.text.toString()
         val description = binding.descriptionEditText.text.toString()
         val category = binding.categoryEditText.text.toString()
@@ -156,20 +165,16 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             category,
             newAttachments
         )
-        var newTaskId: Long
-        lifecycleScope.launch {
-            newTaskId = taskViewModel.addTask(task)
-            task.id = newTaskId.toInt()
-            if(notificationEnabled) {
-                val twentyMinutes : Long = 20 * 60 * 1000
-                Toast.makeText(this@AddTaskActivity, "Notification added", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch(Dispatchers.IO) {
+            taskViewModel.addTask(task)
+            if (notificationEnabled) {
+                task.id = taskViewModel.getMaxId() + 1
+                withContext(Dispatchers.Main) {
+                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
+                }
+                AlarmReceiver.createNotification(this@AddTaskActivity, task)
             }
         }
-
-        AlarmReceiver.createNotification(this, task)
-
-
-        Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show()
 
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
