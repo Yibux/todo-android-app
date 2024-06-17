@@ -39,7 +39,6 @@ class SingleTaskInfoActivity : ComponentActivity() {
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
         val taskId: Int = intent.getIntExtra("task_id", -1)
         if (taskId == -1) {
-            // Handle the case where the task ID was not found
             Log.e("SingleTaskInfoActivity", "No task ID found in intent extras")
             return
         }
@@ -47,7 +46,7 @@ class SingleTaskInfoActivity : ComponentActivity() {
         taskViewModel.getTaskById(taskId).observe(this) { task ->
             binding.titleText.text = "Title: " + task?.title
             binding.categoryText.text = "Category: " + task?.taskCategory
-            binding.dateText.text = "Date: " + task?.endDate.toString()
+            binding.dateText.text = "Date: " + task?.endDate.toString().replace("T", " ")
             binding.descriptionText.text = "Description: " + task?.description
             binding.statusCheckBox.isChecked = task?.isDone ?: false
             binding.statusCheckBox.text = if (task?.isDone == true) "status (Done)" else "status (Not Done)"

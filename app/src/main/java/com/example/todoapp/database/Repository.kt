@@ -36,4 +36,8 @@ class Repository(private val todoDao: TodoDao) {
     fun getMaxId(): Int {
         return todoDao.getMaxId()
     }
+
+    fun getTaskById(id: Int): Task {
+        return todoDao.getTaskById(id)
+    }
 }

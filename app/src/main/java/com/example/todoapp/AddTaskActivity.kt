@@ -2,12 +2,12 @@ package com.example.todoapp
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.makeText
 import androidx.activity.enableEdgeToEdge
@@ -19,21 +19,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.AddTaskActivityBinding
 import com.example.todoapp.model.Task
-import com.example.todoapp.receiver.AlarmReceiver
 import com.example.todoapp.receiver.AlarmReceiver.Companion.startAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
-class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener {
+class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener, TimePickerFragment.OnTimeSelectedListener {
     private lateinit var binding: AddTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
+    private var selectedTime: LocalTime = LocalTime.now()
     private var attachments: MutableList<String> = mutableListOf()
     private val attachmentAdapter by lazy { AttachmentAdapter() }
 
@@ -63,6 +65,11 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             datePicker.show(supportFragmentManager, "datePicker")
         }
 
+        binding.pickTime.setOnClickListener {
+            val timePicker = TimePickerFragment()
+            timePicker.show(supportFragmentManager, "timePicker")
+        }
+
         binding.attachFileButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -78,7 +85,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
-                    if(attachments.size == 1 && attachments[0].length == 0)
+                    if(attachments.size == 1 && attachments[0].isEmpty())
                         attachments[0] = uri.toString()
                     else
                         attachments.add(uri.toString())
@@ -86,7 +93,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
-                if(attachments.size == 1 && attachments[0].length == 0) {
+                if(attachments.size == 1 && attachments[0].isEmpty()) {
                     attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
                 else {
@@ -95,7 +102,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             }
 
             runOnUiThread {
-                if(attachments.size != 1 || attachments[0].length != 0) {
+                if(attachments.size != 1 || attachments[0].isNotEmpty()) {
                     attachmentAdapter.differ.submitList(attachments)
                     binding.attachmentsRecyclerViewer.apply {
                         layoutManager = LinearLayoutManager(this@AddTaskActivity,
@@ -107,7 +114,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         }
     }
 
-    fun getFileNameFromUri(uri: Uri?): String? {
+    private fun getFileNameFromUri(uri: Uri?): String? {
         var fileName: String? = null
         val cursor = contentResolver.query(uri!!, null, null, null, null)
         cursor?.use {
@@ -135,7 +142,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         binding.addTaskButton.isEnabled = binding.titleEditText.text!!.isNotEmpty() &&
                 binding.descriptionEditText.text!!.isNotEmpty() &&
                 binding.categoryEditText.text!!.isNotEmpty() &&
-                binding.dateText.text!!.isNotEmpty()
+                binding.dateText.text!!.isNotEmpty() &&
+                binding.timeText.text!!.isNotEmpty()
     }
 
     override fun onDateSelected(year: Int, month: Int, day: Int) {
@@ -144,13 +152,18 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         activeTaskButton()
     }
 
+    override fun onTimeSelected(hour: Int, minute: Int) {
+        selectedTime = LocalTime.of(hour, minute)
+        binding.timeText.text = selectedTime.toString()
+        activeTaskButton()
+    }
+
     private suspend fun addTask() {
         val title = binding.titleEditText.text.toString()
         val description = binding.descriptionEditText.text.toString()
         val category = binding.categoryEditText.text.toString()
-        val endDate = LocalDate.now()
         var newAttachments: List<String>? = null
-        if(attachments.size != 1 || attachments[0].length != 0) {
+        if(attachments.size != 1 || attachments[0].isNotEmpty()) {
             newAttachments = attachments
         }
         val notificationEnabled = binding.notificationSwitch.isChecked
@@ -160,7 +173,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             description,
             false,
             selectedDate,
-            endDate,
+            LocalDateTime.of(selectedDate, selectedTime),
             notificationEnabled,
             category,
             newAttachments
@@ -172,12 +185,39 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
                 withContext(Dispatchers.Main) {
                     makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
                 }
-                AlarmReceiver.createNotification(this@AddTaskActivity, task)
+                val sharedProvider = getSharedPreferences("alarms", MODE_PRIVATE)
+                val delay = getNotificationTime(sharedProvider, selectedDate, selectedTime)
+                startAlarm(this@AddTaskActivity, delay, task.id, task.title,
+                    LocalDateTime.of(selectedDate, selectedTime))
             }
         }
 
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+    }
+
+    companion object {
+        fun getNotificationTime(
+            sharedProvider: SharedPreferences,
+            selectedDate: LocalDate,
+            selectedTime: LocalTime
+        ): Long {
+            val notificationTime = sharedProvider.getString("notification_time", "1")?.toLong() ?: 1
+            return calculateDelayToNotificationTime(notificationTime, selectedDate, selectedTime)
+        }
+        fun calculateDelayToNotificationTime(
+            notificationTime: Long,
+            selectedDate: LocalDate,
+            selectedTime: LocalTime
+        ): Long {
+            val zoneId = ZoneId.systemDefault()
+            val selectedDateTime = ZonedDateTime.of(selectedDate, selectedTime, zoneId)
+            val beforeDelay = selectedDateTime.minusMinutes(notificationTime)
+            val currentDateTime = ZonedDateTime.now(zoneId)
+
+            val duration = Duration.between(currentDateTime, beforeDelay)
+            return duration.toMillis()
+        }
     }
 }

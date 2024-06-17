@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todoapp.AddTaskActivity.Companion.calculateDelayToNotificationTime
+import com.example.todoapp.AddTaskActivity.Companion.getNotificationTime
 import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.EditTaskActivityBinding
 import com.example.todoapp.model.Task
@@ -23,12 +25,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener,
-    AttachmentAdapter.OnAttachmentDeletedListener {
+    AttachmentAdapter.OnAttachmentDeletedListener, TimePickerFragment.OnTimeSelectedListener {
     private lateinit var binding: EditTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
+    private var selectedTime: LocalTime = LocalTime.now()
     private var attachments: MutableList<String> = mutableListOf()
     private val attachmentAdapter by lazy { AttachmentAdapter() }
 
@@ -60,7 +65,12 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             }
             binding.titleEditText.setText(task.title)
             binding.categoryEditText.setText(task.taskCategory)
-            binding.dateText.text = task.endDate.toString()
+            val date = task.endDate?.toLocalDate()
+            val time = task.endDate?.toLocalTime()
+            binding.dateText.text = date.toString()
+            selectedDate = date!!
+            binding.timeText.text = time.toString()
+            selectedTime = time!!
             binding.descriptionEditText.setText(task.description)
             binding.notificationSwitch.isChecked = task.notificationOn
             binding.statusCheckBox.isChecked = task.isDone
@@ -72,11 +82,14 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             updateUI()
         }
 
-
-
         binding.pickDate.setOnClickListener {
             val datePicker = DatePickerFragment()
             datePicker.show(supportFragmentManager, "datePicker")
+        }
+
+        binding.pickTime.setOnClickListener {
+            val timePicker = TimePickerFragment()
+            timePicker.show(supportFragmentManager, "timePicker")
         }
 
         binding.attachFileButton.setOnClickListener {
@@ -96,7 +109,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
-                    if(attachments.size == 1 && attachments[0].length == 0)
+                    if(attachments.size == 1 && attachments[0].isEmpty())
                         attachments[0] = uri.toString()
                     else
                         attachments.add(uri.toString())
@@ -104,7 +117,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
-                if(attachments.size == 1 && attachments[0].length == 0) {
+                if(attachments.size == 1 && attachments[0].isEmpty()) {
                     attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
                 else {
@@ -165,24 +178,32 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         activeTaskButton()
     }
 
+    override fun onTimeSelected(hour: Int, minute: Int) {
+        selectedTime = LocalTime.of(hour, minute)
+        binding.timeText.text = selectedTime.toString()
+    }
+
     private fun editTask(task: Task?) {
         if (task == null) {
             return
         }
         task.title = binding.titleEditText.text.toString()
         task.taskCategory = binding.categoryEditText.text.toString()
-        task.endDate = selectedDate
+        task.endDate = LocalDateTime.now()
         task.description = binding.descriptionEditText.text.toString()
         task.isDone = binding.statusCheckBox.isChecked
         task.notificationOn = binding.notificationSwitch.isChecked
         task.attachments = attachments
+        task.endDate = LocalDateTime.of(selectedDate, selectedTime)
         lifecycleScope.launch(Dispatchers.IO) {
             taskViewModel.updateTask(task)
             if (binding.notificationSwitch.isChecked) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@EditTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
                 }
-                AlarmReceiver.createNotification(this@EditTaskActivity, task)
+                val sharedProvider = getSharedPreferences("alarms", MODE_PRIVATE)
+                val delay = getNotificationTime(sharedProvider, selectedDate, selectedTime)
+//                AlarmReceiver.rescheduleAlarm(this@EditTaskActivity, task.id, delay)
             }
         }
 

@@ -58,4 +58,10 @@ class TaskViewModel(application: Application): AndroidViewModel(application) {
             repository.getMaxId()
         }
     }
+
+    suspend fun getTaskObjectById(id: Int) : Task {
+        return withContext(Dispatchers.IO) {
+            repository.getTaskById(id)
+        }
+    }
 }

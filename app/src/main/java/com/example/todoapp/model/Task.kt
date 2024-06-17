@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity(tableName = "tasks")
 @Parcelize
@@ -27,7 +28,7 @@ data class Task(
     var createdAt : LocalDate = LocalDate.now(),
 
     @ColumnInfo(name = "end_date")
-    var endDate : LocalDate? = null,
+    var endDate : LocalDateTime? = null,
 
     @ColumnInfo(name = "notification_on")
     var notificationOn : Boolean = false,

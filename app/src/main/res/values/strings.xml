@@ -20,4 +20,6 @@
     <string name="channel_name">task_channel\n</string>
     <string name="channel_description">task_message</string>
     <string name="no_attachments">No attachments</string>
+    <string name="choose_when_should_notifications_pop_up">Choose when should notifications pop up:</string>
+    <string name="pick_time">Pick time</string>
 </resources>

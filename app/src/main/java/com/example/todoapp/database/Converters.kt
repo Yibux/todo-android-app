@@ -1,10 +1,14 @@
 package com.example.todoapp.database
 
+import android.util.Log
+import androidx.room.ColumnInfo
 import androidx.room.TypeConverter
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeParseException
 import java.util.Locale
 
 class Converters {
@@ -38,5 +42,24 @@ class Converters {
     @TypeConverter
     fun stringListToString(list: List<String>): String {
         return list.joinToString(",")
+    }
+
+    @TypeConverter
+    fun toLocalDateTime(value: String?): LocalDateTime? {
+        Log.w("TAG", "value: $value")
+        val newValue = value?.replace("T", " ")
+        val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        return newValue?.let {
+            try {
+                LocalDateTime.parse(it, dateTimeFormatter)
+            } catch (e: DateTimeParseException) {
+                LocalDate.parse(it).atStartOfDay()
+            }
+        }
+    }
+
+    @TypeConverter
+    fun fromLocalDateTime(date: LocalDateTime?): String {
+        return date.toString()
     }
 }

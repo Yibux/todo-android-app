@@ -1,50 +1,49 @@
 package com.example.todoapp
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
+import android.graphics.drawable.Icon
+import android.media.Image
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.TextView
+import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.Switch
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.adapter.TaskAdapter
 import com.example.todoapp.receiver.AlarmReceiver
-import com.example.todoapp.receiver.AlarmReceiver.Companion.startAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalDateTime
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var addTaskButton: FloatingActionButton
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var taskRecycleViewer: RecyclerView
     private lateinit var searchTask : EditText
-    private lateinit var timeLeftText: TextView
     private val taskAdapter by lazy { TaskAdapter() }
     private var taskNumber: Int = 0
     private lateinit var handler: Handler
+    private lateinit var spinner: Spinner
+    private lateinit var doneTaskSwitch : Switch
+    private lateinit var settings : ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +52,9 @@ class MainActivity : ComponentActivity() {
         addTaskButton = findViewById(R.id.task_fab)
         taskRecycleViewer = findViewById(R.id.taskList)
         searchTask = findViewById(R.id.searchTask)
-        timeLeftText = findViewById(R.id.time_left_text)
+        spinner = findViewById(R.id.allCategories)
+        doneTaskSwitch = findViewById(R.id.doneTasksSwitch)
+        settings = findViewById(R.id.settingsButton)
         AlarmReceiver.createNotificationChannel("task_channel", this)
 
         searchTask.addTextChangedListener(object : TextWatcher {
@@ -69,11 +70,25 @@ class MainActivity : ComponentActivity() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+
+
+        doneTaskSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if(!isChecked) {
+                taskViewModel.getTasks().value?.let { tasks ->
+                    val filteredTasks = tasks.sortedWith(compareBy { it.endDate })
+                    taskAdapter.differ.submitList(filteredTasks)
+                }
+            } else {
+                taskViewModel.getTasks().value?.let { tasks ->
+                    val filteredTasks = tasks.sortedWith(compareBy { it.endDate })
+                        .filter { it.isDone != isChecked }
+                    taskAdapter.differ.submitList(filteredTasks)
+                }
+            }
+        }
         //jobscheduler
         //ile przed zakonczeniem zadania dostajemy powiadomienie
-        //przycisk w powiadominiuu po nacisnieciu przenosi do aplikacji (osobny przycisk)
-        // i przenosim y
-        // się do zadania konkretnego
         //kopiowac zalaczniki do folderu aplikacji
 
         // Notification
@@ -91,8 +106,15 @@ class MainActivity : ComponentActivity() {
         }
 
         taskViewModel.getTasks().observe(this) { tasks ->
+            val categories = tasks.map { it.taskCategory }.distinct().toMutableList()
+            categories.add(0, "All")
+            val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = spinnerAdapter
+            spinner.onItemSelectedListener = this
             taskNumber = tasks.filter {
-                it.endDate == LocalDate.now() && it.notificationOn && !it.isDone
+                it.endDate == LocalDateTime
+                    .now() && it.notificationOn && !it.isDone
             }.size
 
             val tasksToSubmit = tasks.sortedWith(compareBy { it.endDate})
@@ -104,19 +126,18 @@ class MainActivity : ComponentActivity() {
                     adapter = taskAdapter
                 }
             }
+
+            settings.setOnClickListener {
+                val taskIds = tasks.filter { it.notificationOn }.map { it.id }
+                val intent = Intent(this, SettingsActivity::class.java).apply {
+                    putExtra("tasks_id_with_notifications", taskIds.toIntArray())
+                }
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            }
         }
 
-//        lifecycleScope.launch {
-//            val maxId = taskViewModel.getMaxId()
-//            withContext(Dispatchers.Main) {
-//                timeLeftText.text = "max id: $maxId"
-//                print(maxId)
-//            }
-//        }
-
         handler = Handler(Looper.getMainLooper())
-
-
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -127,5 +148,25 @@ class MainActivity : ComponentActivity() {
         } else {
             // Permission is denied
         }
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, postion: Int, p3: Long) {
+        val category = parent?.getItemAtPosition(postion).toString()
+        if(category == "All") {
+            taskViewModel.getTasks().observe(this) { tasks ->
+                val filteredTasks = tasks.sortedWith(compareBy { it.endDate })
+                taskAdapter.differ.submitList(filteredTasks)
+            }
+        } else {
+            taskViewModel.getTasks().observe(this) { tasks ->
+                val filteredTasks = tasks.sortedWith(compareBy { it.endDate })
+                    .filter { it.taskCategory == category }
+                taskAdapter.differ.submitList(filteredTasks)
+            }
+        }
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+
     }
 }
