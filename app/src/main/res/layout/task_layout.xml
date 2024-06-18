@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:layout_margin="20dp"
-    android:background="@color/cool_gray"
+    android:background="@color/purple_500"
     android:orientation="vertical">
 
     <LinearLayout
@@ -22,19 +22,25 @@
                 android:id="@+id/titleTextView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.33" />
+                android:layout_weight="0.33"
+                android:textColor="@color/white"
+                style="@style/TextInfo"/>
 
             <TextView
                 android:id="@+id/categoryTextView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.33" />
+                android:layout_weight="0.33"
+                android:textColor="@color/white"
+                style="@style/TextInfo"/>
 
             <TextView
                 android:id="@+id/endDate"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.33" />
+                android:layout_weight="0.33"
+                android:textColor="@color/white"
+                style="@style/TextInfo"/>
 
         </LinearLayout>
 

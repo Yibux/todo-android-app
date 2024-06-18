@@ -24,6 +24,8 @@ import com.example.todoapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -93,6 +95,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
+                val newFile = File(applicationContext.filesDir, fileName.toString())
+                copyFile(uri!!, newFile)
                 if(attachments.size == 1 && attachments[0].isEmpty()) {
                     attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
@@ -114,6 +118,18 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         }
     }
 
+    private fun copyFile(uri: Uri, newFile: File) {
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(newFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun getFileNameFromUri(uri: Uri?): String? {
         var fileName: String? = null
         val cursor = contentResolver.query(uri!!, null, null, null, null)
@@ -127,7 +143,6 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         return fileName
     }
 
-
     private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -137,6 +152,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
 
         override fun afterTextChanged(s: Editable?) {}
     }
+
 
     private fun activeTaskButton() {
         binding.addTaskButton.isEnabled = binding.titleEditText.text!!.isNotEmpty() &&
@@ -197,6 +213,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
     }
 
     companion object {
+
         fun getNotificationTime(
             sharedProvider: SharedPreferences,
             selectedDate: LocalDate,

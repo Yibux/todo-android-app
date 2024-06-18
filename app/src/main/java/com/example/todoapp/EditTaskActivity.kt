@@ -26,6 +26,8 @@ import com.example.todoapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -119,6 +121,8 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
+                val newFile = File(applicationContext.filesDir, fileName.toString())
+                copyFile(uri!!, newFile)
                 if(attachments.size == 1 && attachments[0].isEmpty()) {
                     attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
@@ -225,6 +229,18 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         val intent = Intent(this, SingleTaskInfoActivity::class.java)
         intent.putExtra("task_id", task.id)
         startActivity(intent)
+    }
+
+    private fun copyFile(uri: Uri, newFile: File) {
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(newFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onAttachmentDeleted(id: Int) {

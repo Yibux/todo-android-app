@@ -13,7 +13,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:layout_marginTop="20dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -22,6 +23,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/titleEditText"
+                    style="@style/TextInfo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/title" />
@@ -30,11 +32,13 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                style="@style/TextInfo"
                 android:layout_weight="0.1">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/descriptionEditText"
                     android:layout_width="match_parent"
+                    style="@style/TextInfo"
                     android:layout_height="match_parent"
                     android:hint="@string/description" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -47,6 +51,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/categoryEditText"
                     android:layout_width="match_parent"
+                    style="@style/TextInfo"
                     android:layout_height="match_parent"
                     android:hint="@string/category" />
 
@@ -61,11 +66,13 @@
                     android:id="@+id/pickTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    style="@style/TextInfo"
                     android:text="@string/pick_time" />
 
                 <TextView
                     android:id="@+id/timeText"
                     android:layout_width="match_parent"
+                    style="@style/TextInfo"
                     android:layout_height="wrap_content"
                     android:text="" />
 
@@ -80,12 +87,14 @@
                     android:id="@+id/pickDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    style="@style/TextInfo"
                     android:text="@string/pick_date" />
 
                 <TextView
                     android:id="@+id/dateText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    style="@style/TextInfo"
                     android:text="" />
             </LinearLayout>
 
@@ -95,12 +104,14 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.05"
                 android:text="@string/notification"
+                style="@style/TextInfo"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             <Button
                 android:id="@+id/attachFileButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                style="@style/TextInfo"
                 android:text="@string/attach_file" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -108,15 +119,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/attachedFilesText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.1" />
-
             <Button
                 android:id="@+id/addTaskButton"
                 android:layout_width="match_parent"
+                style="@style/TextInfo"
                 android:layout_height="0dp"
                 android:layout_weight="0.1"
                 android:text="@string/add_task" />

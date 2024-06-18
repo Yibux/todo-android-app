@@ -9,12 +9,14 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.1">
+        android:layout_weight="0.1"
+        android:layout_marginTop="20dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/titleEditText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            style="@style/TextInfo"
             android:hint="@string/title" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -26,6 +28,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/descriptionEditText"
             android:layout_width="match_parent"
+            style="@style/TextInfo"
             android:layout_height="match_parent"
             android:hint="@string/description" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -38,6 +41,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/categoryEditText"
             android:layout_width="match_parent"
+            style="@style/TextInfo"
             android:layout_height="match_parent"
             android:hint="@string/category" />
 
@@ -53,12 +57,14 @@
             android:id="@+id/pickTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/TextInfo"
             android:text="@string/pick_time" />
 
         <TextView
             android:id="@+id/timeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/TextInfo"
             android:text="" />
 
     </LinearLayout>
@@ -72,12 +78,14 @@
             android:id="@+id/pickDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/TextInfo"
             android:text="@string/pick_date" />
 
         <TextView
             android:id="@+id/dateText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/TextInfo"
             android:text="" />
 
     </LinearLayout>
@@ -93,6 +101,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0.33"
             android:text="@string/notification"
+            style="@style/TextInfo"
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <CheckBox
@@ -100,6 +109,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.33"
+            style="@style/TextInfo"
             android:text="status" />
 
     </LinearLayout>
@@ -108,6 +118,7 @@
         android:id="@+id/attachFileButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="@string/attach_file" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -121,6 +132,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.1"
+        style="@style/TextInfo"
         android:text="@string/edit_task" />
 
 </LinearLayout>

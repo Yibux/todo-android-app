@@ -26,6 +26,13 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.90" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.82"/>
+
     <EditText
         android:id="@+id/searchTask"
         android:layout_width="wrap_content"
@@ -63,27 +70,32 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintStart_toEndOf="@id/searchTask"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline"
-        android:src="@mipmap/ic_launcher"/>
+        app:layout_constraintStart_toEndOf="@id/searchTask"
+        app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/taskList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/guideline3"/>
+        app:layout_constraintTop_toBottomOf="@id/guideline3"
+        app:layout_constraintBottom_toTopOf="@id/guideline2"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/task_fab"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:clickable="true"
-        app:srcCompat="@android:drawable/ic_menu_add"
         android:padding="20sp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline2"
+        app:layout_constraintLeft_toLeftOf="@id/guideline4"
         android:contentDescription="ADD TASK"
-        android:layout_margin="15dp"/>
+        android:layout_margin="15dp"
+        app:rippleColor="@color/purple_500"
+        app:backgroundTint="@color/purple_500"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

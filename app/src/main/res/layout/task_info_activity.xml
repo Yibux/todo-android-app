@@ -11,24 +11,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
+        style="@style/TextInfo"
         android:layout_marginTop="50dp"/>
 
     <TextView
         android:id="@+id/categoryText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="" />
 
     <TextView
         android:id="@+id/descriptionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="" />
 
     <TextView
         android:id="@+id/dateText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="" />
 
 
@@ -43,6 +47,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0.5"
             android:text="@string/notification"
+            style="@style/TextInfo"
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <CheckBox
@@ -50,6 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            style="@style/TextInfo"
             android:text="@string/status" />
     </LinearLayout>
 
@@ -57,6 +63,7 @@
         android:id="@+id/attachmentsText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="@string/attachments" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -68,11 +75,13 @@
         android:id="@+id/editButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="@string/edit_task" />
 
     <Button
         android:id="@+id/deleteButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/TextInfo"
         android:text="@string/delete_task" />
 </LinearLayout>

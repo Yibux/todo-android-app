@@ -9,12 +9,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/choose_when_should_notifications_pop_up"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="50dp"
+        android:textColor="@color/black"
+        style="@style/TextInfo"/>
 
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:id="@+id/notificationHour" />
+        android:id="@+id/notificationHour"
+        style="@style/TextInfo"/>
 
 </LinearLayout>

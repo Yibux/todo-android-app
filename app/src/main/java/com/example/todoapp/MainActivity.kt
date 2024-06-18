@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
         spinner = findViewById(R.id.allCategories)
         doneTaskSwitch = findViewById(R.id.doneTasksSwitch)
         settings = findViewById(R.id.settingsButton)
+        settings.setImageResource(R.drawable.settings)
         AlarmReceiver.createNotificationChannel("task_channel", this)
 
         searchTask.addTextChangedListener(object : TextWatcher {
@@ -87,9 +88,6 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
                 }
             }
         }
-        //jobscheduler
-        //ile przed zakonczeniem zadania dostajemy powiadomienie
-        //kopiowac zalaczniki do folderu aplikacji
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED) {
@@ -118,7 +116,7 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
 
             val tasksToSubmit = tasks.sortedBy { it.endDate }
             runOnUiThread {
-                taskAdapter.differ.submitList(tasks)
+                taskAdapter.differ.submitList(tasksToSubmit)
                 val context = this@MainActivity
                 taskRecycleViewer.apply {
                     layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
