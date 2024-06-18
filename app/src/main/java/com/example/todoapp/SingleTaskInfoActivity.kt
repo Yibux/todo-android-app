@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.adapter.ViewAttachmentAdapter
 import com.example.todoapp.databinding.TaskInfoActivityBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.receiver.AlarmReceiver.Companion.cancelAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
 
 class SingleTaskInfoActivity : ComponentActivity() {
@@ -57,6 +58,7 @@ class SingleTaskInfoActivity : ComponentActivity() {
 
             binding.deleteButton.setOnClickListener {
                 taskViewModel.deleteTask(task!!)
+                cancelAlarm(this, task.id)
                 val intent = Intent(this, MainActivity::class.java).apply{
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }

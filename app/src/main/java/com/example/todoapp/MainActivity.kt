@@ -91,7 +91,6 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
         //ile przed zakonczeniem zadania dostajemy powiadomienie
         //kopiowac zalaczniki do folderu aplikacji
 
-        // Notification
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -128,7 +127,7 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
             }
 
             settings.setOnClickListener {
-                val taskIds = tasks.filter { it.notificationOn }.map { it.id }
+                val taskIds = tasks.filter { it.notificationOn && it.endDate!!.isAfter(LocalDateTime.now()) }.map { it.id }
                 val intent = Intent(this, SettingsActivity::class.java).apply {
                     putExtra("tasks_id_with_notifications", taskIds.toIntArray())
                 }

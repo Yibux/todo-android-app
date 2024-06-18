@@ -186,7 +186,7 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
                     makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
                 }
 
-                startAlarm(this@AddTaskActivity, task.id, task.title,
+                startAlarm(this@AddTaskActivity, task.id + 1, task.title,
                     LocalDateTime.of(selectedDate, selectedTime))
             }
         }

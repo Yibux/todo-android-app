@@ -15,7 +15,9 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.todoapp.R
 import com.example.todoapp.SingleTaskInfoActivity
 import com.example.todoapp.model.Task
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -97,7 +99,8 @@ class AlarmReceiver : BroadcastReceiver() {
                 context, taskId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             val sharedPreferences = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
-            val delayTimeInMinutes = sharedPreferences.getLong("notification_time", 1)
+            val delayTimeInMinutes = sharedPreferences.getLong("notification_hour", 1)
+            Log.d("AlarmReceiver", "Delay time in minutes: $delayTimeInMinutes")
 
             val taskEndTimeInMillis = taskEndDate.toEpochSecond(ZoneOffset.UTC) * 1000
             val currentTimeInMillis = System.currentTimeMillis()
@@ -106,6 +109,11 @@ class AlarmReceiver : BroadcastReceiver() {
 
             if (delay > 0) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, pendingIntent)
+                val millis = System.currentTimeMillis() + delay
+                val instant = Instant.ofEpochMilli(millis)
+                val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+                Log.d("AlarmReceiver", "Alarm set for task ID: $taskId at $taskEndDate with delay: $delay")
+                Log.d("AlarmReceiver", "Hour of the alarm: $localDateTime")
             } else {
                 Log.d("AlarmReceiver", "Computed delay is negative, not setting the alarm.")
             }
@@ -122,7 +130,6 @@ class AlarmReceiver : BroadcastReceiver() {
                 putString("alarm_time_$taskId", taskEndDate.toString())
                 apply()
             }
-            Log.d("AlarmReceiver", "Alarm set for task ID: $taskId at $taskEndDate with delay: $delay")
             Log.d("AlarmReceiver", "${sharedPreferences.all}")
         }
 
