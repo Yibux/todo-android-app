@@ -48,6 +48,7 @@ class Converters {
     fun toLocalDateTime(value: String?): LocalDateTime? {
         Log.w("TAG", "value: $value")
         val newValue = value?.replace("T", " ")
+        Log.w("TAG", "newValue: $newValue")
         val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         return newValue?.let {
             try {

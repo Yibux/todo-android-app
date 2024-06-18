@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.widget.Toast
+import android.widget.Toast.makeText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +21,7 @@ import com.example.todoapp.adapter.AttachmentAdapter
 import com.example.todoapp.databinding.EditTaskActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.receiver.AlarmReceiver
+import com.example.todoapp.receiver.AlarmReceiver.Companion.rescheduleAlarmWithLocalDateTime
 import com.example.todoapp.viewmodel.TaskViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -195,15 +197,28 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         task.notificationOn = binding.notificationSwitch.isChecked
         task.attachments = attachments
         task.endDate = LocalDateTime.of(selectedDate, selectedTime)
+        val sharedProvider = getSharedPreferences("alarms", MODE_PRIVATE)
         lifecycleScope.launch(Dispatchers.IO) {
             taskViewModel.updateTask(task)
             if (binding.notificationSwitch.isChecked) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@EditTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
                 }
-                val sharedProvider = getSharedPreferences("alarms", MODE_PRIVATE)
                 val delay = getNotificationTime(sharedProvider, selectedDate, selectedTime)
-//                AlarmReceiver.rescheduleAlarm(this@EditTaskActivity, task.id, delay)
+                if (delay > 0) {
+                    rescheduleAlarmWithLocalDateTime(
+                        this@EditTaskActivity,
+                        task.id,
+                        LocalDateTime.of(selectedDate, selectedTime)
+                    )
+                } else {
+//                    makeText(, "Invalid notification time", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                val alarmId = sharedProvider.getInt("alarm_${task.id}", -1)
+                if (alarmId != -1) {
+                    AlarmReceiver.cancelAlarm(this@EditTaskActivity, task.id)
+                }
             }
         }
 

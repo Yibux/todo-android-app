@@ -16,6 +16,7 @@ import com.example.todoapp.R
 import com.example.todoapp.SingleTaskInfoActivity
 import com.example.todoapp.model.Task
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -57,9 +58,11 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val sharedPreferences = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
+        Log.d("AlarmReceiverNotification", "${sharedPreferences.all}")
         with(sharedPreferences.edit()) {
             remove("alarm_$taskId")
             remove("task_name_$taskId")
+            remove("alarm_time_$taskId")
             apply()
         }
     }
@@ -79,7 +82,6 @@ class AlarmReceiver : BroadcastReceiver() {
 
         fun startAlarm(
             context: Context,
-            delay: Long,
             taskId : Int,
             taskTitle : String,
             taskEndDate: LocalDateTime
@@ -94,51 +96,104 @@ class AlarmReceiver : BroadcastReceiver() {
             val pendingIntent = PendingIntent.getBroadcast(
                 context, taskId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            val triggerTime = (taskEndDate.toEpochSecond(java.time.ZoneOffset.UTC) * 1000) - delay
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                triggerTime,
-                pendingIntent
-            )
-
             val sharedPreferences = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
+            val delayTimeInMinutes = sharedPreferences.getLong("notification_time", 1)
+
+            val taskEndTimeInMillis = taskEndDate.toEpochSecond(ZoneOffset.UTC) * 1000
+            val currentTimeInMillis = System.currentTimeMillis()
+            val delayTimeInMillis = delayTimeInMinutes * 60 * 1000
+            val delay = taskEndTimeInMillis - currentTimeInMillis - delayTimeInMillis
+
+            if (delay > 0) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, pendingIntent)
+            } else {
+                Log.d("AlarmReceiver", "Computed delay is negative, not setting the alarm.")
+            }
+
             with(sharedPreferences.edit()) {
                 putInt("alarm_$taskId", taskId)
+                apply()
+            }
+            with(sharedPreferences.edit()) {
                 putString("task_name_$taskId", taskTitle)
+                apply()
+            }
+            with(sharedPreferences.edit()) {
                 putString("alarm_time_$taskId", taskEndDate.toString())
                 apply()
             }
+            Log.d("AlarmReceiver", "Alarm set for task ID: $taskId at $taskEndDate with delay: $delay")
+            Log.d("AlarmReceiver", "${sharedPreferences.all}")
         }
 
-        private fun getAlarmFromPreferences(context: Context, taskId: Int): String? {
+        private fun getAlarmFromPreferences(context: Context, taskId: Int, option: Int): String? {
             val sharedPreferences = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
-            return sharedPreferences.getString("alarm_${taskId}_title", null)
+            return when (option) {
+                0 -> {
+                    sharedPreferences.getString("task_name_$taskId", null)
+                }
+                1 -> {
+                    sharedPreferences.getString("alarm_time_$taskId", null)
+                }
+                else -> {
+                    sharedPreferences.getString("alarm_pendingIntent_$taskId", null)
+                }
+            }
         }
 
-        fun cancelAlarm(context: Context, id: Int) : String {
+        fun cancelAlarm(context: Context, id: Int) : Container {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, AlarmReceiver::class.java)
             val pendingIntent = PendingIntent.getBroadcast(
                 context, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            val taskTitle = getAlarmFromPreferences(context, id)
+            val taskTitle = getAlarmFromPreferences(context, id, 0)
+            val taskDueDate = getAlarmFromPreferences(context, id, 1)
+
+            if(taskTitle == null || taskDueDate == null) {
+                return Container("", LocalDateTime.now())
+            }
+            val taskConvertedDueDate = LocalDateTime.parse(taskDueDate)
+
+            alarmManager.cancel(pendingIntent)
+            Log.d("AlarmReceiver", "Alarm canceled for task ID: $id")
+
             val sharedPreferences = context.getSharedPreferences("alarms", Context.MODE_PRIVATE)
+            Log.d("AlarmReceiverCancel", "${sharedPreferences.all}")
             with(sharedPreferences.edit()) {
                 remove("alarm_$id")
+                apply()
+            }
+            with(sharedPreferences.edit()) {
                 remove("task_name_$id")
+                apply()
+            }
+            with(sharedPreferences.edit()) {
                 remove("alarm_time_$id")
                 apply()
             }
-
-            alarmManager.cancel(pendingIntent)
-            return taskTitle.toString()
+            return Container(taskTitle.toString(), taskConvertedDueDate)
         }
 
-        fun rescheduleAlarm(context: Context, id: Int, interval: Long, localDateTime: LocalDateTime) {
-            val taskName = cancelAlarm(context, id)
-            startAlarm(context, interval, id, taskName, localDateTime)
+        fun rescheduleAlarm(context: Context, id: Int) {
+            val container = cancelAlarm(context, id)
+            startAlarm(context, id, container.taskName, container.taskTime)
+        }
+
+        fun rescheduleAlarmWithLocalDateTime(
+            context: Context,
+            id: Int,
+            newDueDate: LocalDateTime
+        ) {
+            val container = cancelAlarm(context, id)
+            startAlarm(context, id, container.taskName, newDueDate)
         }
     }
+
+    class Container (
+        val taskName : String,
+        val taskTime : LocalDateTime
+        )
 
 }

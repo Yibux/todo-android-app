@@ -117,9 +117,9 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
                     .now() && it.notificationOn && !it.isDone
             }.size
 
-            val tasksToSubmit = tasks.sortedWith(compareBy { it.endDate})
+            val tasksToSubmit = tasks.sortedBy { it.endDate }
             runOnUiThread {
-                taskAdapter.differ.submitList(tasksToSubmit)
+                taskAdapter.differ.submitList(tasks)
                 val context = this@MainActivity
                 taskRecycleViewer.apply {
                     layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)

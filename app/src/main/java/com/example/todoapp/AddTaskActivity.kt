@@ -181,13 +181,12 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         lifecycleScope.launch(Dispatchers.IO) {
             taskViewModel.addTask(task)
             if (notificationEnabled) {
-                task.id = taskViewModel.getMaxId() + 1
+                task.id = taskViewModel.getMaxId()
                 withContext(Dispatchers.Main) {
                     makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
                 }
-                val sharedProvider = getSharedPreferences("alarms", MODE_PRIVATE)
-                val delay = getNotificationTime(sharedProvider, selectedDate, selectedTime)
-                startAlarm(this@AddTaskActivity, delay, task.id, task.title,
+
+                startAlarm(this@AddTaskActivity, task.id, task.title,
                     LocalDateTime.of(selectedDate, selectedTime))
             }
         }
