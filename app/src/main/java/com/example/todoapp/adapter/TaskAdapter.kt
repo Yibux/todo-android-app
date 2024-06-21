@@ -30,6 +30,12 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         binding.categoryTextView.text = task.taskCategory
         setIsCompletedImage(binding, task.isDone)
 
+        if(task.attachments!!.size >= 0 && task.attachments!![0].isNotEmpty()) {
+            binding.attachmentIcon.setImageResource(android.R.drawable.stat_notify_sdcard)
+        } else {
+            binding.attachmentIcon.visibility = android.view.View.GONE
+        }
+
         binding.isCompleted.setOnClickListener {
             task.isDone = !task.isDone
             setIsCompletedImage(binding, task.isDone)
@@ -39,7 +45,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
             val context = holder.itemView.context
             val intent = Intent(context, SingleTaskInfoActivity::class.java).apply {
                 putExtra("task_id", task.id)
-//                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             context.startActivity(intent)
         }

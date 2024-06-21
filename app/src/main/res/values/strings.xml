@@ -22,4 +22,6 @@
     <string name="no_attachments">No attachments</string>
     <string name="choose_when_should_notifications_pop_up">Choose when should notifications pop up:</string>
     <string name="pick_time">Pick time</string>
+    <string name="attachment_in_the_task">Attachment in the task</string>
+    <string name="settings">Settings</string>
 </resources>

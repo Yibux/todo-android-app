@@ -12,34 +12,39 @@
         android:layout_height="wrap_content"
         android:text=""
         style="@style/TextInfo"
-        android:layout_marginTop="50dp"/>
+        android:layout_marginTop="50dp"
+        android:layout_weight="0.15"/>
 
     <TextView
         android:id="@+id/categoryText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextInfo"
-        android:text="" />
+        android:text=""
+        android:layout_weight="0.15" />
 
     <TextView
         android:id="@+id/descriptionText"
+        style="@style/TextInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/TextInfo"
-        android:text="" />
+        android:text=""
+        android:layout_weight="0.15" />
 
     <TextView
         android:id="@+id/dateText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextInfo"
-        android:text="" />
+        android:text=""
+        android:layout_weight="0.15"/>
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_weight="0.1">
 
         <Switch
             android:id="@+id/notificationSwitch"
@@ -64,24 +69,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextInfo"
-        android:text="@string/attachments" />
+        android:text="@string/attachments"
+        android:layout_weight="0.1"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/attachmentsRecyclerViewer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"/>
 
     <Button
         android:id="@+id/editButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextInfo"
-        android:text="@string/edit_task" />
+        android:background="@color/purple_500"
+        android:textColor="@color/white"
+        android:text="@string/edit_task"
+        android:layout_weight="0.03"/>
 
     <Button
         android:id="@+id/deleteButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/purple_500"
         style="@style/TextInfo"
-        android:text="@string/delete_task" />
+        android:text="@string/delete_task"
+        android:textColor="@color/white"
+        android:layout_weight="0.03"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="30dp"/>
 </LinearLayout>

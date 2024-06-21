@@ -194,17 +194,32 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             category,
             newAttachments
         )
-        lifecycleScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
             taskViewModel.addTask(task)
-            if (notificationEnabled) {
+        }
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            if (notificationEnabled) {
+//                task.id = taskViewModel.getMaxId()
+////                withContext(Dispatchers.Main) {
+////                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
+////                }
+//
+//                startAlarm(this@AddTaskActivity, task.id, task.title,
+//                    LocalDateTime.of(selectedDate, selectedTime))
+//            }
+//        }
+        //TODO: check why not always task is added
+        //TODO: after addding attachment add path to app file,  create internal file with task id
+        if (notificationEnabled) {
+            withContext(Dispatchers.Main) {
                 task.id = taskViewModel.getMaxId()
-                withContext(Dispatchers.Main) {
-                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
-                }
-
-                startAlarm(this@AddTaskActivity, task.id + 1, task.title,
-                    LocalDateTime.of(selectedDate, selectedTime))
             }
+//                withContext(Dispatchers.Main) {
+//                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
+//                }
+
+            startAlarm(this@AddTaskActivity, task.id, task.title,
+                LocalDateTime.of(selectedDate, selectedTime))
         }
 
         val intent = Intent(this, MainActivity::class.java)

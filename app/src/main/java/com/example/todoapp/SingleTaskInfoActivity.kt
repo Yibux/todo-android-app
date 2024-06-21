@@ -14,6 +14,7 @@ import com.example.todoapp.databinding.TaskInfoActivityBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.receiver.AlarmReceiver.Companion.cancelAlarm
 import com.example.todoapp.viewmodel.TaskViewModel
+import java.io.File
 
 class SingleTaskInfoActivity : ComponentActivity() {
     private lateinit var binding: TaskInfoActivityBinding
@@ -57,6 +58,14 @@ class SingleTaskInfoActivity : ComponentActivity() {
 
 
             binding.deleteButton.setOnClickListener {
+                task?.attachments?.forEach { attachmentUri ->
+                    val file = File(attachmentUri)
+                    val deleteSuccess = file.delete()
+
+                    if (!deleteSuccess) {
+                        Log.e("File Deletion", "Failed to delete file: $attachmentUri")
+                    }
+                }
                 taskViewModel.deleteTask(task!!)
                 cancelAlarm(this, task.id)
                 val intent = Intent(this, MainActivity::class.java).apply{
@@ -81,7 +90,7 @@ class SingleTaskInfoActivity : ComponentActivity() {
                         adapter = viewAttachmentAdapter
                     }
                 } else {
-                    binding.attachmentsText.text = "@string/no_attachments"
+                    binding.attachmentsText.text = "No attachments"
                 }
             }
         }

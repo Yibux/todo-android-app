@@ -7,10 +7,19 @@
     android:background="@color/purple_500"
     android:orientation="vertical">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/attachmentIcon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"
+            android:contentDescription="@string/attachment_in_the_task"
+            app:srcCompat="@android:drawable/stat_notify_sdcard" />
 
         <LinearLayout
             android:layout_width="0dp"
