@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
+        android:textColor="@color/black"
         style="@style/TextInfo"
         android:layout_marginTop="50dp"
         android:layout_weight="0.15"/>
@@ -21,7 +22,8 @@
         android:layout_height="wrap_content"
         style="@style/TextInfo"
         android:text=""
-        android:layout_weight="0.15" />
+        android:layout_weight="0.15"
+        android:textColor="@color/black" />
 
     <TextView
         android:id="@+id/descriptionText"
@@ -29,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
+        android:textColor="@color/black"
         android:layout_weight="0.15" />
 
     <TextView
@@ -37,6 +40,7 @@
         android:layout_height="wrap_content"
         style="@style/TextInfo"
         android:text=""
+        android:textColor="@color/black"
         android:layout_weight="0.15"/>
 
 
@@ -50,6 +54,7 @@
             android:id="@+id/notificationSwitch"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:textColor="@color/black"
             android:layout_weight="0.5"
             android:text="@string/notification"
             style="@style/TextInfo"
@@ -59,6 +64,7 @@
             android:id="@+id/statusCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:textColor="@color/black"
             android:layout_weight="0.5"
             style="@style/TextInfo"
             android:text="@string/status" />
@@ -69,6 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/TextInfo"
+        android:textColor="@color/black"
         android:text="@string/attachments"
         android:layout_weight="0.1"/>
 

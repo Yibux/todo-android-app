@@ -11,11 +11,14 @@ import com.example.todoapp.EditTaskActivity
 import com.example.todoapp.SingleTaskInfoActivity
 import com.example.todoapp.databinding.TaskLayoutBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.viewmodel.TaskViewModel
+import kotlinx.coroutines.withContext
 
-class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
+class TaskAdapter(private val taskViewModel: TaskViewModel) : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
 
     private lateinit var binding : TaskLayoutBinding
     inner class ViewHolder : RecyclerView.ViewHolder(binding.root)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskAdapter.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         binding = TaskLayoutBinding.inflate(inflater, parent, false)
@@ -26,7 +29,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         val binding = TaskLayoutBinding.bind(holder.itemView)
         val task = differ.currentList[position]
         binding.titleTextView.text = task.title
-        binding.endDate.text = task.endDate.toString()
+        binding.endDate.text = task.endDate.toString().replace("T", " ")
         binding.categoryTextView.text = task.taskCategory
         setIsCompletedImage(binding, task.isDone)
 
@@ -39,6 +42,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         binding.isCompleted.setOnClickListener {
             task.isDone = !task.isDone
             setIsCompletedImage(binding, task.isDone)
+            taskViewModel.updateTask(task)
         }
 
         binding.root.setOnClickListener {

@@ -5,17 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginTop="80dp">
+    android:layout_marginTop="60dp">
 
     <EditText
         android:id="@+id/searchTask"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:ems="12"
-        android:hint="Search for a task"
+        android:hint="@string/search_for_a_task"
         android:inputType="text"
         style="@style/TextInfo"
-        android:layout_weight="0.1" />
+        android:layout_weight="0.2" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -23,7 +23,7 @@
         android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/searchTask"
-        android:layout_weight="0.1">
+        android:layout_weight="0.08">
 
         <Spinner
             android:id="@+id/allCategories"
@@ -53,7 +53,7 @@
         android:id="@+id/taskList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.8"/>
+        android:layout_weight="0.7"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/task_fab"

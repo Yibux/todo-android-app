@@ -40,6 +40,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
     private var selectedTime: LocalTime = LocalTime.now()
     private var attachments: MutableList<String> = mutableListOf()
     private val attachmentAdapter by lazy { AttachmentAdapter() }
+    private var taskId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,7 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
 
         taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
-        val taskId: Int = intent.getIntExtra("task_id", -1)
+        taskId = intent.getIntExtra("task_id", -1)
         if (taskId == -1) {
             Log.e("EditTaskActivity", "Invalid task ID")
             return
@@ -121,8 +122,14 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
-                val newFile = File(applicationContext.filesDir, fileName.toString())
+                val taskDirectory = File(applicationContext.filesDir, taskId.toString())
+                if(!taskDirectory.exists()) {
+                    taskDirectory.mkdirs()
+                    Log.d("Directory", "Generating directory $taskId")
+                }
+                val newFile = File(taskDirectory, fileName.toString())
                 copyFile(uri!!, newFile)
+
                 if(attachments.size == 1 && attachments[0].isEmpty()) {
                     attachments[0] = uri.toString() + "\n" + fileName.toString()
                 }
@@ -205,11 +212,24 @@ class EditTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedL
         lifecycleScope.launch(Dispatchers.IO) {
             taskViewModel.updateTask(task)
             if (binding.notificationSwitch.isChecked) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@EditTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
-                }
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(this@EditTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
+//                }
                 val delay = getNotificationTime(sharedProvider, selectedDate, selectedTime)
                 if (delay > 0) {
+                    with(sharedProvider.edit()) {
+                        putInt("alarm_$taskId", taskId)
+                        apply()
+                    }
+                    with(sharedProvider.edit()) {
+                        putString("task_name_$taskId", task.title)
+                        apply()
+                    }
+                    with(sharedProvider.edit()) {
+                        putString("alarm_time_$taskId", task.endDate.toString())
+                        apply()
+                    }
+
                     rescheduleAlarmWithLocalDateTime(
                         this@EditTaskActivity,
                         task.id,

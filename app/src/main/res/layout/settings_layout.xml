@@ -7,17 +7,19 @@
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="@string/choose_when_should_notifications_pop_up"
         android:layout_marginTop="50dp"
         android:textColor="@color/black"
-        style="@style/TextInfo"/>
+        style="@style/TextInfo"
+        android:layout_weight="0.3"/>
 
     <RadioGroup
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:orientation="vertical"
         android:id="@+id/notificationHour"
-        style="@style/TextInfo"/>
+        style="@style/TextInfo"
+        android:layout_weight="0.7"/>
 
 </LinearLayout>

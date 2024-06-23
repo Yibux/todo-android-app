@@ -194,7 +194,7 @@ class AlarmReceiver : BroadcastReceiver() {
             newDueDate: LocalDateTime
         ) {
             val container = cancelAlarm(context, id)
-            startAlarm(context, id, container.taskName, newDueDate)
+             startAlarm(context, id, container.taskName, newDueDate)
         }
     }
 

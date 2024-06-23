@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.makeText
 import androidx.activity.enableEdgeToEdge
@@ -33,13 +34,14 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener, TimePickerFragment.OnTimeSelectedListener {
+class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedListener, TimePickerFragment.OnTimeSelectedListener, AttachmentAdapter.OnAttachmentDeletedListener {
     private lateinit var binding: AddTaskActivityBinding
     private lateinit var taskViewModel: TaskViewModel
     private var selectedDate: LocalDate = LocalDate.now()
     private var selectedTime: LocalTime = LocalTime.now()
     private var attachments: MutableList<String> = mutableListOf()
     private val attachmentAdapter by lazy { AttachmentAdapter() }
+    private var taskId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +57,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
         binding.descriptionEditText.addTextChangedListener(textWatcher)
         binding.categoryEditText.addTextChangedListener(textWatcher)
         binding.dateText.addTextChangedListener(textWatcher)
+
+        taskId = intent.getIntExtra("task_id", -1)
 
         binding.addTaskButton.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
@@ -95,13 +99,20 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             } else {
                 val uri = result.data?.data
                 val fileName = getFileNameFromUri(uri)
-                val newFile = File(applicationContext.filesDir, fileName.toString())
+                val taskDirectory = File(applicationContext.filesDir, taskId.toString())
+                if(!taskDirectory.exists()) {
+                    taskDirectory.mkdirs()
+                    Log.d("Directory", "Generating directory $taskId")
+                }
+                val newFile = File(taskDirectory, fileName.toString())
                 copyFile(uri!!, newFile)
+
+                val newFileUri = Uri.fromFile(newFile)
                 if(attachments.size == 1 && attachments[0].isEmpty()) {
-                    attachments[0] = uri.toString() + "\n" + fileName.toString()
+                    attachments[0] = newFileUri.toString() + "\n" + fileName.toString()
                 }
                 else {
-                    attachments.add(uri.toString() + "\n" + fileName.toString())
+                    attachments.add(newFileUri.toString() + "\n" + fileName.toString())
                 }
             }
 
@@ -194,31 +205,14 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             category,
             newAttachments
         )
-        withContext(Dispatchers.Main) {
-            taskViewModel.addTask(task)
-        }
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            if (notificationEnabled) {
-//                task.id = taskViewModel.getMaxId()
-////                withContext(Dispatchers.Main) {
-////                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
-////                }
-//
-//                startAlarm(this@AddTaskActivity, task.id, task.title,
-//                    LocalDateTime.of(selectedDate, selectedTime))
-//            }
-//        }
-        //TODO: check why not always task is added
-        //TODO: after addding attachment add path to app file,  create internal file with task id
-        if (notificationEnabled) {
-            withContext(Dispatchers.Main) {
-                task.id = taskViewModel.getMaxId()
-            }
-//                withContext(Dispatchers.Main) {
-//                    makeText(this@AddTaskActivity, "id: $task", Toast.LENGTH_SHORT).show()
-//                }
 
-            startAlarm(this@AddTaskActivity, task.id, task.title,
+        taskViewModel.addTask(task)
+
+        if (notificationEnabled) {
+//            withContext(Dispatchers.Main) {
+//                task.id = taskViewModel.getMaxId()
+//            }
+            startAlarm(this@AddTaskActivity, taskId, task.title,
                 LocalDateTime.of(selectedDate, selectedTime))
         }
 
@@ -250,5 +244,9 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.OnDateSelectedLi
             val duration = Duration.between(currentDateTime, beforeDelay)
             return duration.toMillis()
         }
+    }
+
+    override fun onAttachmentDeleted(id: Int) {
+        attachments.removeAt(id)
     }
 }

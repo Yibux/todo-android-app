@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var taskViewModel: TaskViewModel
     private lateinit var taskRecycleViewer: RecyclerView
     private lateinit var searchTask : EditText
-    private val taskAdapter by lazy { TaskAdapter() }
+    private val taskAdapter by lazy { TaskAdapter(taskViewModel) }
     private var taskNumber: Int = 0
     private lateinit var handler: Handler
     private lateinit var spinner: Spinner
@@ -58,6 +58,8 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
         settings.setImageResource(R.drawable.settings)
         AlarmReceiver.createNotificationChannel("task_channel", this)
 
+        taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
+
         searchTask.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -70,10 +72,9 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
             }
 
             override fun afterTextChanged(s: Editable?) {}
+
         })
-
-
-
+        
         doneTaskSwitch.setOnCheckedChangeListener { _, isChecked ->
             if(!isChecked) {
                 taskViewModel.getTasks().value?.let { tasks ->
@@ -94,13 +95,8 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
-        addTaskButton.setOnClickListener {
-            val intent = Intent(this, AddTaskActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-        }
+
 
         taskViewModel.getTasks().observe(this) { tasks ->
             val categories = tasks.map { it.taskCategory }.distinct().toMutableList()
@@ -109,6 +105,18 @@ class MainActivity : ComponentActivity(), AdapterView.OnItemSelectedListener {
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = spinnerAdapter
             spinner.onItemSelectedListener = this
+
+            addTaskButton.setOnClickListener {
+                val intent = Intent(this, AddTaskActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                var taskId = tasks.maxByOrNull { it.id }?.id ?: 0
+                taskId += 1
+
+                intent.putExtra("task_id", taskId)
+                startActivity(intent)
+            }
+
             taskNumber = tasks.filter {
                 it.endDate == LocalDateTime
                     .now() && it.notificationOn && !it.isDone

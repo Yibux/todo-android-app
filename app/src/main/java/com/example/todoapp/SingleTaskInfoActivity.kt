@@ -59,12 +59,16 @@ class SingleTaskInfoActivity : ComponentActivity() {
 
             binding.deleteButton.setOnClickListener {
                 task?.attachments?.forEach { attachmentUri ->
-                    val file = File(attachmentUri)
-                    val deleteSuccess = file.delete()
+                    val directory = File(task.id.toString())
+                    if(directory.exists()) {
+                        val file = File(directory, attachmentUri)
+                        val deleteSuccess = file.delete()
 
-                    if (!deleteSuccess) {
-                        Log.e("File Deletion", "Failed to delete file: $attachmentUri")
+                        if (!deleteSuccess) {
+                            Log.e("File Deletion", "Failed to delete file: $attachmentUri")
+                        }
                     }
+
                 }
                 taskViewModel.deleteTask(task!!)
                 cancelAlarm(this, task.id)

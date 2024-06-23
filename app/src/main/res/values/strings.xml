@@ -24,4 +24,6 @@
     <string name="pick_time">Pick time</string>
     <string name="attachment_in_the_task">Attachment in the task</string>
     <string name="settings">Settings</string>
+    <string name="search_for_a_task">Search for a task</string>
+    <string name="new_old">new/old</string>
 </resources>

@@ -1,11 +1,13 @@
 package com.example.todoapp.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.databinding.AttachmentFragmentBinding
+import java.io.File
 
 
 class AttachmentAdapter: RecyclerView.Adapter<AttachmentAdapter.ViewHolder>() {
@@ -36,6 +38,16 @@ class AttachmentAdapter: RecyclerView.Adapter<AttachmentAdapter.ViewHolder>() {
         binding.deleteAttachmentButton.setOnClickListener {
             val currentList = differ.currentList.toMutableList()
             if (position in currentList.indices) {
+                val attachmentUri = currentList[position].split("\n")[0].replace("file:","")
+                val file = File(attachmentUri)
+                val deleteSuccess = file.delete()
+
+                if (!deleteSuccess) {
+                    Log.e("File Deletion", "Failed to delete file: $attachmentUri")
+                } else {
+                    Log.d("File Deleted", "File $attachmentUri successfully deleted.")
+                }
+
                 currentList.removeAt(position)
                 differ.submitList(currentList)
                 onAttachmentDeletedListener?.onAttachmentDeleted(position)
