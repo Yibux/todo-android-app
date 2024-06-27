@@ -27,15 +27,23 @@ class ViewAttachmentAdapter: RecyclerView.Adapter<ViewAttachmentAdapter.ViewHold
         if (position < differ.currentList.size) {
             val attachment: String = differ.currentList[position]
             val attachmentSplit = attachment.split("\n")
-            val attachmentUri = Uri.parse(attachmentSplit[0])
+            val attachmentUri = attachmentSplit[0].replace("file://", "")
             val fileName = attachmentSplit[1]
 
             binding.attachmentText.text = fileName
 
             holder.itemView.setOnClickListener {
+                val file = File(attachmentUri)
+
+                val contentUri = FileProvider.getUriForFile(
+                    holder.itemView.context,
+                    "${holder.itemView.context.packageName}.fileprovider",
+                    file
+                )
+
                 val intent = Intent(Intent.ACTION_VIEW).apply {
                     flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    setDataAndType(attachmentUri, "*/*")
+                    setDataAndType(contentUri, "*/*")
                 }
 
                 startActivity(holder.itemView.context, intent, null)
